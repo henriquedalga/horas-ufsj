@@ -22,6 +22,7 @@ public class SolicitacaoService {
     
     public void atualizarSolicitacao(Solicitacao solicitacao) {
         // Lógica para atualizar uma solicitação existente
+        
         solicitacaoRepository.save(solicitacao);
     }
 
@@ -38,5 +39,5 @@ public class SolicitacaoService {
         return solicitacaoRepository.findByStatus(status);
     }
 
-    
+
 }
