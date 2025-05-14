@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.universidade.sighoras.entity.Arquivo;
+import com.universidade.sighoras.repository.ArquivoRepository;
 
 public class ArquivoService {
     // Aqui você pode adicionar métodos para manipular arquivos, como upload, download, etc.
     // Por exemplo:
-    
+    private final ArquivoRepository arquivoRepository;
+
+    public ArquivoService(ArquivoRepository arquivoRepository) {
+        this.arquivoRepository = arquivoRepository;
+    }
     // Método para fazer upload de um arquivo
     public void uploadArquivo(Arquivo arquivo) {
         // Lógica para fazer upload do arquivo
+        arquivoRepository.save(arquivo);
+        //chamar Drive service para fazer upload no Google Drive
     }
     
     // Método para excluir um arquivo
