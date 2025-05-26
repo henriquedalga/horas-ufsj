@@ -13,8 +13,7 @@ public class SolicitacaoService {
         this.solicitacaoRepository = solicitacaoRepository;
     }
     // Métodos de CRUD
-    // Outros métodos relacionados a solicitações podem ser adicionados aqui
-    // Exemplo de método para criar uma nova solicitação
+    
     public void criarSolicitacao(Solicitacao solicitacao) {
         // Lógica para criar uma nova solicitação
         solicitacaoRepository.save(solicitacao);

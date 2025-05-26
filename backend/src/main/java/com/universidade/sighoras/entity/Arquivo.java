@@ -1,6 +1,9 @@
 package com.universidade.sighoras.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,12 +17,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Arquivo {
-    Long id;
-    Long idSolicitacao;
-    Long matricula;
-    String nomeArquivo;
-    String link;
-    String Comentario;
-    String data;
-    String Drivelink;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    private Long idSolicitacao;
+    private Long matricula;
+    private String nomeArquivo;
+    private String link;
+    private String Comentario;
+    private String data;
+    private String Drivelink;
 }
