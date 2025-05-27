@@ -1,0 +1,13 @@
+.login-wrapper {
+  background-color: #ffffff;
+
+  padding: 2rem;
+}
+
+.initial-wrapper {
+  background-color: #f7f7f7;
+}
+
+.header-menu-trigger {
+  display: none;
+}
