@@ -11,7 +11,7 @@
 	<groupId>com.example</groupId>
 	<artifactId>demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>horas-ufsj</name>
+	<name>horasUfsj</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -73,6 +73,11 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>6.2.7.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>com.exemplo</groupId>
+			<artifactId>google-drive-integration</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 
