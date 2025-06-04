@@ -1,6 +1,7 @@
+import { useEffect } from "react";
+
 import Header from "../components/Header";
 import Upload from "../components/Upload";
-import { useEffect } from "react";
 
 export default function Student() {
   useEffect(() => {

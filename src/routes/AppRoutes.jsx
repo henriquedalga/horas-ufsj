@@ -1,8 +1,9 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Navigate,Route, Routes } from "react-router-dom";
+
+import Initial from "../pages/Initial";
+import { AdminRoutes } from "./AdminRoutes";
 import PrivateRoute from "./PrivateRoute";
 import { StudentRoutes } from "./StudentRoutes";
-import { AdminRoutes } from "./AdminRoutes";
-import Initial from "../pages/Initial";
 // import Unauthorized from "../pages/Unauthorized";
 // import NotFound from "../pages/NotFound";
 
