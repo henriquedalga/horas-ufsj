@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.609" tests="11" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="19"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/test-classes:/Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/classes:/Users/henriquedalga/.m2/repository/com/google/apis/google-api-services-drive/v3-rev20250427-2.0.0/google-api-services-drive-v3-rev20250427-2.0.0.jar:/Users/henriquedalga/.m2/repository/com/google/http-client/google-http-client/1.43.3/google-http-client-1.43.3.jar:/Users/henriquedalga/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar:/Users/henriquedalga/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/Users/henriquedalga/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar:/Users/henriquedalga/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/Users/henriquedalga/.m2/repository/com/google/errorprone/error_prone_annotations/2.18.0/error_prone_annotations-2.18.0.jar:/Users/henriquedalga/.m2/repository/com/google/guava/guava/30.1.1-android/guava-30.1.1-android.jar:/Users/henriquedalga/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/Users/henriquedalga/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/Users/henriquedalga/.m2/repository/org/checkerframework/checker-compat-qual/2.5.5/checker-compat-qual-2.5.5.jar:/Users/henriquedalga/.m2/repository/com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar:/Users/henriquedalga/.m2/repository/io/opencensus/opencensus-api/0.31.1/opencensus-api-0.31.1.jar:/Users/henriquedalga/.m2/repository/io/grpc/grpc-context/1.27.2/grpc-context-1.27.2.jar:/Users/henriquedalga/.m2/repository/io/opencensus/opencensus-contrib-http-util/0.31.1/opencensus-contrib-http-util-0.31.1.jar:/Users/henriquedalga/.m2/repository/com/google/http-client/google-http-client-gson/1.43.3/google-http-client-gson-1.43.3.jar:/Users/henriquedalga/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:/Users/henriquedalga/.m2/repository/com/google/api-client/google-api-client/2.5.0/google-api-client-2.5.0.jar:/Users/henriquedalga/.m2/repository/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar:/Users/henriquedalga/.m2/repository/com/google/oauth-client/google-oauth-client/1.35.0/google-oauth-client-1.35.0.jar:/Users/henriquedalga/.m2/repository/com/google/auth/google-auth-library-credentials/1.23.0/google-auth-library-credentials-1.23.0.jar:/Users/henriquedalga/.m2/repository/com/google/http-client/google-http-client-apache-v2/1.44.1/google-http-client-apache-v2-1.44.1.jar:/Users/henriquedalga/.m2/repository/com/google/auth/google-auth-library-oauth2-http/1.19.0/google-auth-library-oauth2-http-1.19.0.jar:/Users/henriquedalga/.m2/repository/com/google/auto/value/auto-value-annotations/1.10.1/auto-value-annotations-1.10.1.jar:/Users/henriquedalga/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.12.0/junit-jupiter-api-5.12.0.jar:/Users/henriquedalga/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/henriquedalga/.m2/repository/org/junit/platform/junit-platform-commons/1.12.0/junit-platform-commons-1.12.0.jar:/Users/henriquedalga/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/henriquedalga/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.12.0/junit-jupiter-engine-5.12.0.jar:/Users/henriquedalga/.m2/repository/org/junit/platform/junit-platform-engine/1.12.0/junit-platform-engine-1.12.0.jar:/Users/henriquedalga/.m2/repository/org/mockito/mockito-core/5.17.0/mockito-core-5.17.0.jar:/Users/henriquedalga/.m2/repository/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar:/Users/henriquedalga/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar:/Users/henriquedalga/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/henriquedalga/.m2/repository/org/mockito/mockito-junit-jupiter/5.17.0/mockito-junit-jupiter-5.17.0.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="America/Sao_Paulo"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="19"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="BR"/>
+    <property name="sun.boot.library.path" value="/Users/henriquedalga/Library/Java/JavaVirtualMachines/openjdk-19/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/surefire/surefirebooter-20250527230616842_3.jar /Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/surefire 2025-05-27T23-06-16_716-jvmRun1 surefire-20250527230616842_1tmp surefire_0-20250527230616842_2tmp"/>
+    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/test-classes:/Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/classes:/Users/henriquedalga/.m2/repository/com/google/apis/google-api-services-drive/v3-rev20250427-2.0.0/google-api-services-drive-v3-rev20250427-2.0.0.jar:/Users/henriquedalga/.m2/repository/com/google/http-client/google-http-client/1.43.3/google-http-client-1.43.3.jar:/Users/henriquedalga/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar:/Users/henriquedalga/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/Users/henriquedalga/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar:/Users/henriquedalga/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/Users/henriquedalga/.m2/repository/com/google/errorprone/error_prone_annotations/2.18.0/error_prone_annotations-2.18.0.jar:/Users/henriquedalga/.m2/repository/com/google/guava/guava/30.1.1-android/guava-30.1.1-android.jar:/Users/henriquedalga/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/Users/henriquedalga/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/Users/henriquedalga/.m2/repository/org/checkerframework/checker-compat-qual/2.5.5/checker-compat-qual-2.5.5.jar:/Users/henriquedalga/.m2/repository/com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar:/Users/henriquedalga/.m2/repository/io/opencensus/opencensus-api/0.31.1/opencensus-api-0.31.1.jar:/Users/henriquedalga/.m2/repository/io/grpc/grpc-context/1.27.2/grpc-context-1.27.2.jar:/Users/henriquedalga/.m2/repository/io/opencensus/opencensus-contrib-http-util/0.31.1/opencensus-contrib-http-util-0.31.1.jar:/Users/henriquedalga/.m2/repository/com/google/http-client/google-http-client-gson/1.43.3/google-http-client-gson-1.43.3.jar:/Users/henriquedalga/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:/Users/henriquedalga/.m2/repository/com/google/api-client/google-api-client/2.5.0/google-api-client-2.5.0.jar:/Users/henriquedalga/.m2/repository/commons-codec/commons-codec/1.17.0/commons-codec-1.17.0.jar:/Users/henriquedalga/.m2/repository/com/google/oauth-client/google-oauth-client/1.35.0/google-oauth-client-1.35.0.jar:/Users/henriquedalga/.m2/repository/com/google/auth/google-auth-library-credentials/1.23.0/google-auth-library-credentials-1.23.0.jar:/Users/henriquedalga/.m2/repository/com/google/http-client/google-http-client-apache-v2/1.44.1/google-http-client-apache-v2-1.44.1.jar:/Users/henriquedalga/.m2/repository/com/google/auth/google-auth-library-oauth2-http/1.19.0/google-auth-library-oauth2-http-1.19.0.jar:/Users/henriquedalga/.m2/repository/com/google/auto/value/auto-value-annotations/1.10.1/auto-value-annotations-1.10.1.jar:/Users/henriquedalga/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.12.0/junit-jupiter-api-5.12.0.jar:/Users/henriquedalga/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/henriquedalga/.m2/repository/org/junit/platform/junit-platform-commons/1.12.0/junit-platform-commons-1.12.0.jar:/Users/henriquedalga/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/henriquedalga/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.12.0/junit-jupiter-engine-5.12.0.jar:/Users/henriquedalga/.m2/repository/org/junit/platform/junit-platform-engine/1.12.0/junit-platform-engine-1.12.0.jar:/Users/henriquedalga/.m2/repository/org/mockito/mockito-core/5.17.0/mockito-core-5.17.0.jar:/Users/henriquedalga/.m2/repository/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar:/Users/henriquedalga/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar:/Users/henriquedalga/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/Users/henriquedalga/.m2/repository/org/mockito/mockito-junit-jupiter/5.17.0/mockito-junit-jupiter-5.17.0.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/henriquedalga"/>
+    <property name="user.language" value="pt"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2022-09-20"/>
+    <property name="java.home" value="/Users/henriquedalga/Library/Java/JavaVirtualMachines/openjdk-19/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/henriquedalga/Desktop/horas-ufsj/drivebackend"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="surefire.real.class.path" value="/Users/henriquedalga/Desktop/horas-ufsj/drivebackend/target/surefire/surefirebooter-20250527230616842_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.runtime.version" value="19+36-2238"/>
+    <property name="user.name" value="henriquedalga"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="11.6.7"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="localRepository" value="/Users/henriquedalga/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/94/ndgql9fx3hjc58_60gvd0c7c0000gn/T/"/>
+    <property name="java.version" value="19"/>
+    <property name="user.dir" value="/Users/henriquedalga/Desktop/horas-ufsj/drivebackend"/>
+    <property name="os.arch" value="x86_64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/henriquedalga/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="19+36-2238"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.class.version" value="63.0"/>
+  </properties>
+  <testcase name="createFolderIfNotExists_whenNotExists_createsAndReturnsNewId" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.442"/>
+  <testcase name="deleteFile_callsApiDelete" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.046"/>
+  <testcase name="setFileReadOnly_callsUpdateWithRestriction" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.04"/>
+  <testcase name="listFilesInFolder_returnsFileList" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.004"/>
+  <testcase name="findFileIdByName_whenNotFound_returnsNull" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.006"/>
+  <testcase name="createFolderIfNotExists_whenExists_returnsExistingId" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.005"/>
+  <testcase name="findFileIdByName_whenFound_returnsId" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.005"/>
+  <testcase name="getFileLink_returnsWebViewLink" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.037"/>
+  <testcase name="getFolderLink_returnsWebViewLink" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.004"/>
+  <testcase name="uploadFile_delegatesToApi_andReturnsFileId" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.006"/>
+  <testcase name="backupDatabase_createsFolderAndUploads" classname="IntegrandoDrive.persistence.DrivePersistenceTest" time="0.007"/>
+</testsuite>
