@@ -7,6 +7,7 @@ import com.universidade.sighoras.entity.Arquivo;
 
 public interface ArquivoRepository  extends JpaRepository<Arquivo, Long> {
 
-    List<Arquivo> findByIdSolicitacaoIn(Long idSolicitacao);
+    
+    List<Arquivo> findByIdSolicitacao(Long idSolicitacao);
 }
 
