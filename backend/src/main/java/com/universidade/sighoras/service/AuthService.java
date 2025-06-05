@@ -1,5 +1,7 @@
 package com.universidade.sighoras.service;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,7 @@ public class AuthService {
         // Por exemplo, verificar se o email e a senha estão corretos
         funcionario = funcionarioRepository.findByNome(nome);
         if (senha.matches(funcionario.getSenha())) {
-            return "Funcionário autenticado com sucesso!";
-
+            return UUID.randomUUID().toString();
         }
         return "Falha na autenticação do funcionário!";
     }
