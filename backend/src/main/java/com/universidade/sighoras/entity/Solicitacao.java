@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
+import com.universidade.sighoras.entity.Arquivo;
 
 @Table(name = "solicitacao")
 @Entity
@@ -27,7 +29,7 @@ public class Solicitacao {
     private HoraTipo horaTipo;
     private String status;
     private String dataSolicitacao;
-    private String tipoSolicitacao;
     private String resposta;
     private String linkPasta;
+
 }

@@ -22,10 +22,8 @@ public class Arquivo {
     private Long id;
     
     private Long idSolicitacao;
-    private Long matricula;
     private String nomeArquivo;
-    private String link;
+    private String Drivelink;
     private String Comentario;
     private String data;
-    private String Drivelink;
 }
