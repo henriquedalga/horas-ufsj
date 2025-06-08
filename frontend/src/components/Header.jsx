@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect,useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import AuthService from "../services/auth.service";
 
 export default function Header() {
@@ -37,19 +38,14 @@ export default function Header() {
             <div className="header-sign">Assinatura</div>
           </div>
           <div className="header-actions">
-            <div className="header-functions ">
-              <div className="br-list">
-                <div className="br-item">
-                  <button
-                    className="br-button circle small"
-                    type="button"
-                    aria-label="Funcionalidade 4"
-                  >
-                    <i className="fas fa-adjust" aria-hidden="true"></i>
-                    <span className="text">Funcionalidade 4</span>
-                  </button>
-                </div>
-              </div>
+            <div className="br-item">
+              <button
+                className="br-button circle small"
+                type="button"
+                aria-label="Funcionalidade 4"
+              >
+                <i className="fas fa-adjust" aria-hidden="true"></i>
+              </button>
             </div>
 
             <div className="header-login">

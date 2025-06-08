@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import AuthService from "../services/auth.service";
+import { useEffect, useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import AuthService from "../services/auth.service";
 
 export default function Login({ tipo }) {
   const [usuario, setUsuario] = useState("");

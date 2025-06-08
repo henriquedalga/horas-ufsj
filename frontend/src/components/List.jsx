@@ -10,9 +10,7 @@ export default function List({ items, onItemClick }) {
 
   return (
     <div class="br-list horizontal mt-5" role="list">
-      <div class="header">
-        <div class="title">Versão com expansão</div>
-      </div>
+
       <span class="br-divider"></span>
       <div class="group">
         <div
@@ -22,7 +20,7 @@ export default function List({ items, onItemClick }) {
           data-target="h1"
         >
           <div class="content">
-            <div class="flex-fill">RÓTULO 01</div>
+            <div class="flex-fill">Aluno 1</div>
             <i class="fas fa-angle-down" aria-hidden="true"></i>
           </div>
         </div>
@@ -32,7 +30,7 @@ export default function List({ items, onItemClick }) {
               <div class="col-auto">
                 <i class="fas fa-heartbeat" aria-hidden="true"></i>
               </div>
-              <div class="col">Sub-item</div>
+              <div class="col">Aluno 1</div>
             </div>
           </div>
           <span class="br-divider"></span>
@@ -41,7 +39,7 @@ export default function List({ items, onItemClick }) {
               <div class="col-auto">
                 <i class="fas fa-heartbeat" aria-hidden="true"></i>
               </div>
-              <div class="col">Sub-item</div>
+              <div class="col">Aluno 2</div>
             </div>
           </div>
           <span class="br-divider"></span>
@@ -50,7 +48,7 @@ export default function List({ items, onItemClick }) {
               <div class="col-auto">
                 <i class="fas fa-heartbeat" aria-hidden="true"></i>
               </div>
-              <div class="col">Sub-item</div>
+              <div class="col">Aluno 3</div>
             </div>
           </div>
           <span class="br-divider"></span>
@@ -64,7 +62,7 @@ export default function List({ items, onItemClick }) {
           data-target="h2"
         >
           <div class="content">
-            <div class="flex-fill">RÓTULO 02</div>
+            <div class="flex-fill">Aluno 2</div>
             <i class="fas fa-angle-down" aria-hidden="true"></i>
           </div>
         </div>
@@ -106,7 +104,7 @@ export default function List({ items, onItemClick }) {
           data-target="h3"
         >
           <div class="content">
-            <div class="flex-fill">RÓTULO 03</div>
+            <div class="flex-fill">Aluno 3</div>
             <i class="fas fa-angle-down" aria-hidden="true"></i>
           </div>
         </div>

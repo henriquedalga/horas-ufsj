@@ -11,3 +11,14 @@
 .header-menu-trigger {
   display: none;
 }
+
+.br-radio {
+  display: flex;
+  justify-content: center;
+}
+
+.br-item > .br-checkbox:not(.hidden-label) input + label,
+.br-item > .br-radio:not(.hidden-label) input + label {
+  width: auto;
+  padding-right: 20px;
+}
