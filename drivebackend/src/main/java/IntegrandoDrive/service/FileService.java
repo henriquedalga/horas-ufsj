@@ -20,20 +20,27 @@ public class FileService {
     }
 
     public String uploadFile(Student student, java.io.File localFile, String folderId) throws IOException {
-        // Upload só bloqueia via status da Solicitação no serviço
+        if (student.hasSubmitted()) {
+            throw new IllegalStateException("Aluno já submeteu: não pode adicionar arquivos.");
+        }
         return persistence.uploadFile(localFile, folderId);
     }
 
     public void deleteFile(Student student, String fileId) throws IOException {
-        // Exclusão só bloqueia via status da Solicitação no serviço
+        if (student.hasSubmitted()) {
+            throw new IllegalStateException("Aluno já submeteu: não pode excluir arquivos.");
+        }
         persistence.deleteFile(fileId);
     }
 
     public void finalizeSubmission(Student student, String folderId) throws IOException {
-        // Marca arquivos como somente leitura ao finalizar
+        // Marca o estudante como submetido e aplica read-only em todos os arquivos
+        student.setSubmitted(true);
         FileList files = persistence.listFilesInFolder(folderId);
-        for (com.google.api.services.drive.model.File f : files.getFiles()) {
-            persistence.setFileReadOnly(f.getId(), "Submissão finalizada");
+        if (files != null && files.getFiles() != null) {
+            for (com.google.api.services.drive.model.File f : files.getFiles()) {
+                persistence.setFileReadOnly(f.getId(), "Submissão finalizada");
+            }
         }
     }
 

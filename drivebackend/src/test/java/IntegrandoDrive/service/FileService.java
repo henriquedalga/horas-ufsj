@@ -2,57 +2,118 @@ package IntegrandoDrive.service;
 
 import IntegrandoDrive.model.Student;
 import IntegrandoDrive.persistence.DrivePersistence;
+import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import org.springframework.stereotype.Service;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.io.IOException;
+import java.util.List;
 
-@Service
-public class FileService {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    private final DrivePersistence persistence;
+@ExtendWith(MockitoExtension.class)
+class FileServiceTest {
 
-    public FileService(DrivePersistence persistence) {
-        this.persistence = persistence;
+    @Mock
+    private DrivePersistence persistence;
+
+    @InjectMocks
+    private FileService service;
+
+    private Student student;
+    private java.io.File localFile;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        student   = new Student("Fulano", "2021001");
+        localFile = java.io.File.createTempFile("tmp", ".txt");
     }
 
-    public String createStudentFolder(Student student, String parentFolderId) throws IOException {
-        return persistence.createFolderIfNotExists(student.getName(), parentFolderId);
+    @Test
+    void createStudentFolder_delegatesToPersistence() throws IOException {
+        when(persistence.createFolderIfNotExists("Fulano", "parentId"))
+            .thenReturn("folder123");
+
+        String pastaId = service.createStudentFolder(student, "parentId");
+        assertEquals("folder123", pastaId);
+        verify(persistence).createFolderIfNotExists("Fulano", "parentId");
     }
 
-    public String uploadFile(Student student, java.io.File localFile, String folderId) throws IOException {
-        if (student.hasSubmitted()) {
-            throw new IllegalStateException("Aluno já submeteu: não pode adicionar arquivos.");
-        }
-        return persistence.uploadFile(localFile, folderId);
+    @Test
+    void upload_beforeSubmission_delegatesAndReturnsFileId() throws IOException {
+        when(persistence.uploadFile(localFile, "fld")).thenReturn("fileABC");
+
+        String id = service.uploadFile(student, localFile, "fld");
+        assertEquals("fileABC", id);
+        verify(persistence).uploadFile(localFile, "fld");
     }
 
-    public void deleteFile(Student student, String fileId) throws IOException {
-        if (student.hasSubmitted()) {
-            throw new IllegalStateException("Aluno já submeteu: não pode excluir arquivos.");
-        }
-        persistence.deleteFile(fileId);
-    }
-
-    public void finalizeSubmission(Student student, String folderId) throws IOException {
-        // Marca o estudante como submetido e aplica read-only em todos os arquivos
+    @Test
+    void upload_afterSubmission_throws() {
+        // simula que o aluno já submeteu
         student.setSubmitted(true);
-        FileList files = persistence.listFilesInFolder(folderId);
-        if (files != null && files.getFiles() != null) {
-            for (com.google.api.services.drive.model.File f : files.getFiles()) {
-                persistence.setFileReadOnly(f.getId(), "Submissão finalizada");
-            }
-        }
+
+        assertThrows(IllegalStateException.class,
+            () -> service.uploadFile(student, localFile, "fld"));
     }
 
-    public String getFolderLink(String folderId) throws IOException {
-        return persistence.getFolderLink(folderId);
+    @Test
+    void delete_beforeSubmission_delegates() throws IOException {
+        service.deleteFile(student, "fileXYZ");
+        verify(persistence).deleteFile("fileXYZ");
     }
 
-    public String getFileLink(String fileId) throws IOException {
-        return persistence.getFileLink(fileId);
+    @Test
+    void delete_afterSubmission_throws() {
+        student.setSubmitted(true);
+
+        assertThrows(IllegalStateException.class,
+            () -> service.deleteFile(student, "anyId"));
     }
 
-    public void backupDatabase(java.io.File dbDump, String backupFolderId) throws IOException {
-        persistence.backupDatabase(dbDump, backupFolderId);
+    @Test
+    void finalizeSubmission_marksSubmitted_andSetsReadOnlyOnAllFiles() throws IOException {
+        File f1 = new File().setId("id1");
+        File f2 = new File().setId("id2");
+        FileList fl = new FileList().setFiles(List.of(f1, f2));
+
+        when(persistence.listFilesInFolder("folderA")).thenReturn(fl);
+
+        service.finalizeSubmission(student, "folderA");
+
+        // depois de finalizeSubmission, student.hasSubmitted() deve ser true
+        assertTrue(student.hasSubmitted());
+        // todos os arquivos ficaram read-only
+        verify(persistence).setFileReadOnly("id1", "Submissão finalizada");
+        verify(persistence).setFileReadOnly("id2", "Submissão finalizada");
+    }
+
+    @Test
+    void getFolderLink_delegates() throws IOException {
+        when(persistence.getFolderLink("f1")).thenReturn("link1");
+
+        assertEquals("link1", service.getFolderLink("f1"));
+        verify(persistence).getFolderLink("f1");
+    }
+
+    @Test
+    void getFileLink_delegates() throws IOException {
+        when(persistence.getFileLink("f2")).thenReturn("link2");
+
+        assertEquals("link2", service.getFileLink("f2"));
+        verify(persistence).getFileLink("f2");
+    }
+
+    @Test
+    void backupDatabase_delegates() throws IOException {
+        java.io.File dump = java.io.File.createTempFile("dump", ".sql");
+        service.backupDatabase(dump, "backupFolder");
+        verify(persistence).backupDatabase(dump, "backupFolder");
     }
 }
