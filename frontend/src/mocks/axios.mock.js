@@ -105,26 +105,26 @@ const mockAlunoDetails = {
 
 // ✅ Setup de todas as rotas mockadas
 export function setupMockRoutes() {
-  // POST /api/auth/signin
-  mock.onPost("/auth/signin").reply((config) => {
-    const { username, password } = JSON.parse(config.data);
-    const user = mockUsers.find(
-      (u) => u.username === username && u.password === password
-    );
+//   // POST /api/auth/signin
+//   mock.onPost("/auth/signin").reply((config) => {
+//     const { username, password } = JSON.parse(config.data);
+//     const user = mockUsers.find(
+//       (u) => u.username === username && u.password === password
+//     );
 
-    if (user) {
-      return [
-        200,
-        {
-          username: user.username,
-          role: user.role,
-          authToken: user.authToken,
-        },
-      ];
-    }
+//     if (user) {
+//       return [
+//         200,
+//         {
+//           username: user.username,
+//           role: user.role,
+//           authToken: user.authToken,
+//         },
+//       ];
+//     }
 
-    return [401, { message: "Usuário ou senha inválidos" }];
-  });
+//     return [401, { message: "Usuário ou senha inválidos" }];
+//   });
 
   // GET /api/alunos
   mock.onGet("/alunos").reply(200, mockAlunos);

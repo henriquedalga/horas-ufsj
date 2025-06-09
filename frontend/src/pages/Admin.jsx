@@ -17,6 +17,8 @@ export default function Admin() {
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user || !user.authToken) {
+      console.error("Usuário não autentticado" + user + user.authToken);
+      alert("Você precisa estar logado para acessar esta página.");
       window.location.href = "/main";
     }
     if (window.core?.BRTab) {

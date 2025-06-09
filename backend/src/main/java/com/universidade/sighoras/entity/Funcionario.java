@@ -4,9 +4,10 @@ import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,15 +16,21 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "funcionario")
 public class Funcionario {
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Long Id;
-    private String nome;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funcionario_seq")
+    @SequenceGenerator(name = "funcionario_seq", sequenceName = "funcionario_id_seq", allocationSize = 1)
+    private Long id;
+    
 
     @Column(unique = true)
     private String email;
     private String senha;
+    
+    // Construtor sem o campo ID
+    public Funcionario(String email, String senha) {
+        this.email = email;
+        this.senha = senha;
+    }
 }

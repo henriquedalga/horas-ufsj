@@ -41,23 +41,38 @@ export default function Login({ tipo }) {
   }, []);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      await AuthService.login(usuario, senha);
+  e.preventDefault();
+  setErro(null); // Limpa erros anteriores
+  
+  try {
+    console.log(`Iniciando autenticação para ${usuario} como ${tipo}`);
+    await AuthService.login(usuario, senha, tipo);
+    
+    const currentUser = AuthService.getCurrentUser();
+    console.log("Usuário autenticado:", currentUser);
 
-      // Verificação do tipo (ex: vindo do backend: userData.role === 'ALUNO' ou 'FUNCIONARIO')
-      if (tipo === "student") {
-        console.log("Login realizado com sucesso");
-        navigate("/student");
-      } else if (tipo === "admin") {
-        navigate("/admin");
-      } else {
-        setErro("Tipo de usuário desconhecido");
-      }
-    } catch {
-      setErro("Usuário ou senha inválidos");
+    // Verificação do tipo
+    if (tipo === "student") {
+      console.log("Redirecionando para /student");
+      navigate("/student");
+    } else if (tipo === "admin") {
+      console.log("Redirecionando para /admin");
+      navigate("/admin");
+    } else {
+      setErro("Tipo de usuário desconhecido");
     }
-  };
+  } catch (error) {
+    console.error("Erro de login:", error);
+    
+    if (error.response?.status === 401) {
+      setErro("Usuário ou senha inválidos");
+    } else if (error.response?.status === 0) {
+      setErro("Erro de conexão com o servidor");
+    } else {
+      setErro(`Erro: ${error.response?.data || error.message || "Desconhecido"}`);
+    }
+  }
+};
 
   return (
     <div className="login-wrapper flex items-center justify-center shadow-md rounded-lg">

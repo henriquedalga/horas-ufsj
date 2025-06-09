@@ -16,11 +16,8 @@ public class FuncionarioService {
         this.funcionarioRepository = funcionarioRepository;
     }
 
-    public Funcionario cadastrarFuncionario(String nome, String senha, String email) throws FuncionarioDuplicadoException {
-        // Verificar se já existe funcionário com este nome
-        if (funcionarioRepository.findByNome(nome) != null) {
-            throw new FuncionarioDuplicadoException("Já existe um funcionário cadastrado com o nome: " + nome);
-        }
+    public Funcionario cadastrarFuncionario(String email, String senha) throws FuncionarioDuplicadoException {
+        
         
         // Verificar email apenas se foi fornecido
         if (email != null && !email.trim().isEmpty()) {
@@ -30,9 +27,9 @@ public class FuncionarioService {
         }
         
         Funcionario funcionario = new Funcionario();
-        funcionario.setNome(nome);
+        
         funcionario.setSenha(senha);
-        funcionario.setEmail(email); // Pode ser null
+        funcionario.setEmail(email);
         
         try {
             return funcionarioRepository.save(funcionario);
