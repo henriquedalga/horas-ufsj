@@ -28,23 +28,33 @@ public class AuthController {
     @Autowired
     private FakeSigaa fakeSigaa;
 
-    @GetMapping("/auth/funcionario")
-    public ResponseEntity<?> auth(@RequestParam String nome, @RequestParam String senha) {
+    @GetMapping("/check")
+    public ResponseEntity<String> check() {
+        return ResponseEntity.ok("API está funcionando corretamente!");
+    }
+    
+
+    @PostMapping("/auth/signin-admin")
+    public ResponseEntity<?> auth(@RequestBody FuncionarioDTO funcionarioDTO) {
 
         // Aqui você pode chamar o serviço de autenticação
-        String token = authService.authFuncionario(nome, senha);
+        String token = authService.authFuncionario(funcionarioDTO.getEmail(), funcionarioDTO.getSenha());
         if (token != null) {
-            return ResponseEntity.ok(Map.of("token", token));
+            Map<String, Object> response = Map.of(
+            "authToken", token,
+            "username", funcionarioDTO.getEmail(), // Usando email como username
+            "role", "admin" // Definindo role padrão para funcionários
+            );
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
         }
     }
 
-    @PostMapping("/funcionarios")
+    @PostMapping("/cadastrar/funcionario")
     public ResponseEntity<?> cadastrarFuncionario(@RequestBody FuncionarioDTO funcionarioDTO) {
         try {
             Funcionario funcionario = funcionarioService.cadastrarFuncionario(
-                funcionarioDTO.getNome(), 
                 funcionarioDTO.getEmail(), 
                 funcionarioDTO.getSenha()
             );
@@ -56,12 +66,23 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/sigaa/login")
+    //SIGAA Authentication Endpoints
+    @PostMapping("/auth/signin-student")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
+        System.out.println(" Recebendo requisição de login: " + loginDTO);
+    
         Map<String, String> resultado = fakeSigaa.autenticar(loginDTO.getCpf(), loginDTO.getSenha());
+    
+        System.out.println(" Resultado da autenticação: " + resultado);
         
         if (resultado != null) {
-            return ResponseEntity.ok(resultado);
+        // Adaptando a resposta para o formato esperado pelo frontend
+        Map<String, Object> response = Map.of(
+            "authToken", resultado.get("token"),
+            "username", resultado.get("matricula"),
+            "role", "STUDENT" // Definindo role padrão para alunos
+        );
+        return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
         }
