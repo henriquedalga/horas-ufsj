@@ -2,16 +2,19 @@ package com.universidade.sighoras.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.repository.SolicitacaoRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SolicitacaoService {
 
-    private final SolicitacaoRepository solicitacaoRepository;
+    @Autowired
+    private SolicitacaoRepository solicitacaoRepository;
 
-    public SolicitacaoService(SolicitacaoRepository solicitacaoRepository) {
-        this.solicitacaoRepository = solicitacaoRepository;
-    }
+
     // Métodos de CRUD
     
     public void criarSolicitacao(Long matricula, String nome, String email, String horaTipo, String linkPasta) {

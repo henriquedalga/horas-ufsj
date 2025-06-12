@@ -1,7 +1,9 @@
 package com.universidade.sighoras.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.universidade.sighoras.entity.Funcionario;
 import com.universidade.sighoras.repository.FuncionarioRepository;
@@ -10,11 +12,8 @@ import com.universidade.sighoras.service.FuncionarioDuplicadoException;
 @Service
 public class FuncionarioService {
 
+    @Autowired
     private FuncionarioRepository funcionarioRepository;
-
-    public FuncionarioService(FuncionarioRepository funcionarioRepository) {
-        this.funcionarioRepository = funcionarioRepository;
-    }
 
     public Funcionario cadastrarFuncionario(String email, String senha) throws FuncionarioDuplicadoException {
         

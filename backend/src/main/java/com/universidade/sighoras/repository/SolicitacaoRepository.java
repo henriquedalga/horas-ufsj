@@ -11,7 +11,7 @@ public interface SolicitacaoRepository  extends JpaRepository<Solicitacao, Long>
 
     Solicitacao findByMatricula(Long matricula);
 
-    Solicitacao findByMatriculaAndTipoHora(Long matricula, String tipoHora);
+    Solicitacao findByMatriculaAndHoraTipo(Long matricula, String tipoHora);
 
     List<Solicitacao> findByNome(String nome);
     
