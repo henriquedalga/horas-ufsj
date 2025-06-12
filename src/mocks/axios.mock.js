@@ -8,25 +8,32 @@ const mock = new MockAdapter(api, { delayResponse: 500 });
 const mockUsers = [
   {
     username: "aluno",
+    name: "João da Silva",
     password: "1234",
     role: "ALUNO",
     authToken: "fake-token-abc123",
   },
   {
     username: "admin",
+    name: "Administrador",
     password: "1234",
     role: "FUNCIONARIO",
     authToken: "fake-token-xyz789",
   },
 ];
 
-const mockAlunos = [
+// Estrutura comum usada para ambas as categorias
+const mockComplementar = [
   { id: 1, nome: "João Silva", status: "PENDENTE" },
   { id: 2, nome: "Maria Oliveira", status: "REPROVADO" },
-  { id: 3, nome: "Carlos Souza", status: "APROVADO" },
 ];
 
-const mockAlunoDetails = {
+const mockExtensao = [
+  { id: 3, nome: "Carlos Souza", status: "APROVADO" },
+  { id: 4, nome: "Ana Costa", status: "APROVADO" },
+];
+
+const mockDetalhes = {
   1: {
     id: 1,
     nome: "João Silva",
@@ -40,13 +47,6 @@ const mockAlunoDetails = {
         comentario: "",
         dataEnvio: "2024-05-01",
       },
-      {
-        id: "arq2",
-        nome: "certificado_curso.pdf",
-        status: "APROVADO",
-        comentario: "Documento válido e legível.",
-        dataEnvio: "2024-04-15",
-      },
     ],
   },
   2: {
@@ -59,7 +59,7 @@ const mockAlunoDetails = {
         id: "arq3",
         nome: "portfolio_design.pdf",
         status: "REJEITADO",
-        comentario: "O arquivo está incompleto. Favor reenviar.",
+        comentario: "Arquivo incompleto.",
         dataEnvio: "2024-05-10",
       },
     ],
@@ -76,13 +76,6 @@ const mockAlunoDetails = {
         status: "PENDENTE",
         comentario: "",
         dataEnvio: "2024-05-20",
-      },
-      {
-        id: "arq5",
-        nome: "comprovante_evento.pdf",
-        status: "PENDENTE",
-        comentario: "",
-        dataEnvio: "2024-05-22",
       },
     ],
   },
@@ -102,7 +95,6 @@ const mockAlunoDetails = {
     ],
   },
 };
-
 // ✅ Setup de todas as rotas mockadas
 export function setupMockRoutes() {
   // POST /api/auth/signin
@@ -117,6 +109,7 @@ export function setupMockRoutes() {
         200,
         {
           username: user.username,
+          name: user.name,
           role: user.role,
           authToken: user.authToken,
         },
@@ -126,19 +119,53 @@ export function setupMockRoutes() {
     return [401, { message: "Usuário ou senha inválidos" }];
   });
 
-  // GET /api/alunos
-  mock.onGet("/alunos").reply(200, mockAlunos);
+  // GET /complementar
+  mock.onGet("/complementar").reply(200, mockComplementar);
 
-  // GET /api/aluno/:id
-  mock.onGet(new RegExp("/aluno/\\d+")).reply((config) => {
+  // GET /extensao
+  mock.onGet("/extensao").reply(200, mockExtensao);
+
+  // GET /complementar/:id
+  mock.onGet(new RegExp("/complementar/\\d+")).reply((config) => {
     const id = config.url.split("/").pop();
-    const aluno = mockAlunoDetails[id];
+    const data = mockDetalhes[id];
+    return data
+      ? [200, data]
+      : [404, { message: "Complementar não encontrado" }];
+  });
 
-    if (aluno) {
-      return [200, aluno];
+  // GET /extensao/:id
+  mock.onGet(new RegExp("/extensao/\\d+")).reply((config) => {
+    const id = config.url.split("/").pop();
+    const data = mockDetalhes[id];
+    return data ? [200, data] : [404, { message: "Extensão não encontrada" }];
+  });
+
+  // POST /complementar/:id
+  mock.onPost(new RegExp("/complementar/\\d+")).reply((config) => {
+    const id = config.url.split("/").pop();
+    const payload = JSON.parse(config.data);
+    console.log(`Recebido POST complementar/${id}`, payload);
+
+    // Simula atualização no mockDetalhes[id]
+    if (mockDetalhes[id]) {
+      mockDetalhes[id].arquivos = payload.respostas;
+      return [200, { message: "Complementar atualizado com sucesso" }];
     }
+    return [404, { message: "Complementar não encontrado" }];
+  });
 
-    return [404, { message: "Aluno não encontrado" }];
+  // POST /extensao/:id
+  mock.onPost(new RegExp("/extensao/\\d+")).reply((config) => {
+    const id = config.url.split("/").pop();
+    const payload = JSON.parse(config.data);
+    console.log(`Recebido POST extensao/${id}`, payload);
+
+    if (mockDetalhes[id]) {
+      mockDetalhes[id].arquivos = payload.respostas;
+      return [200, { message: "Extensão atualizada com sucesso" }];
+    }
+    return [404, { message: "Extensão não encontrada" }];
   });
 }
 

@@ -4,12 +4,13 @@ class AuthService {
   // Login: envia username e password, recebe token e dados do usuário
   async login(username, password) {
     const response = await api.post("/auth/signin", { username, password });
-    const { authToken, username: name, role } = response.data;
+    console.log("Login response data:", response.data);
+    const { username: usern, name, role, authToken } = response.data;
 
     // Salva dados no sessionStorage para manter sessão
     sessionStorage.setItem(
       "user",
-      JSON.stringify({ authToken, username: name, role })
+      JSON.stringify({ username: usern, name, role, authToken })
     );
 
     return response.data;

@@ -24,7 +24,7 @@ export default function Student() {
                 <button type="button" data-panel="panel-1">
                   <span className="name">
                     <span className="d-flex flex-column flex-sm-row">
-                      <span className="name">Horas de Extensão</span>
+                      <span className="name">Extensão</span>
                     </span>
                   </span>
                 </button>
@@ -33,7 +33,7 @@ export default function Student() {
                 <button type="button" data-panel="panel-2">
                   <span className="name">
                     <span className="d-flex flex-column flex-sm-row">
-                      <span className="name">Horas Complementares</span>
+                      <span className="name">Complementar</span>
                     </span>
                   </span>
                 </button>

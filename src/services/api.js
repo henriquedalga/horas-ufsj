@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -12,16 +12,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const getAlunos = async () => {
-  console.log("Buscando alunos...");
-  const response = await api.get("/alunos");
-  console.log("Alunos no get alunos:", response.data);
-  return response.data;
-};
+// export const getAlunos = async () => {
+//   console.log("Buscando alunos...");
+//   const response = await api.get("/alunos");
+//   console.log("Alunos no get alunos:", response.data);
+//   return response.data;
+// };
 
-export const getAlunoById = async (id) => {
-  const response = await api.get(`/aluno/${id}`);
-  return response.data;
-};
+// export const getAlunoById = async (id) => {
+//   const response = await api.get(`/aluno/${id}`);
+//   return response.data;
+// };
 
 export default api;
