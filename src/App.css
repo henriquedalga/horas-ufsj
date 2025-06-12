@@ -22,3 +22,9 @@
   width: auto;
   padding-right: 20px;
 }
+
+@media (min-width: 576px) {
+  .br-header .header-logo {
+    --header-logo-size: var(--header-logo-large);
+  }
+}

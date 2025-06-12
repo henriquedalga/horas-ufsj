@@ -34,13 +34,13 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="br-header compact fixed top-0 w-full">
+    <header className="br-header small fixed top-0 w-full">
       <div className="container-lg">
         <div className="header-top">
           <div className="header-logo">
-            <img src="/Ccomp.png" alt="logo" />
+            <img src="/UFSJ.png" alt="logo" />
             <span className="br-divider vertical"></span>
-            <div className="header-sign">Assinatura</div>
+            <img src="/Ccomp.png" alt="logo" />
           </div>
           <div className="header-actions">
             <div className="br-item">
