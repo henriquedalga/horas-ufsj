@@ -1,17 +1,21 @@
 package com.universidade.sighoras;
 
+import IntegrandoDrive.service.FileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application.properties")
+@ActiveProfiles("test")
 class HorasUfsjApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @MockitoBean
+    private FileService fileService;
 
+    @Test
+    void contextLoads() {
+    }
 }
