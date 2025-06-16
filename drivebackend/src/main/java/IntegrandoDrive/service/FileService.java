@@ -1,9 +1,9 @@
 package IntegrandoDrive.service;
 
-import IntegrandoDrive.model.Student;
 import IntegrandoDrive.persistence.DrivePersistence;
 import com.google.api.services.drive.model.FileList;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 
 @Service
@@ -15,27 +15,37 @@ public class FileService {
         this.persistence = persistence;
     }
 
-    public String createStudentFolder(Student student, String parentFolderId) throws IOException {
-        return persistence.createFolderIfNotExists(student.getName(), parentFolderId);
+    /**
+     * Cria uma pasta no Drive, se não existir.
+     */
+    public String createFolder(String nome, String parentFolderId) throws IOException {
+        return persistence.createFolderIfNotExists(nome, parentFolderId);
     }
 
-    public String uploadFile(Student student, java.io.File localFile, String folderId) throws IOException {
-        if (student.hasSubmitted()) {
-            throw new IllegalStateException("Aluno já submeteu: não pode adicionar arquivos.");
+    /**
+     * Faz upload de arquivo, desde que a solicitação não esteja finalizada.
+     */
+    public String uploadFile(java.io.File localFile, String folderId, String status) throws IOException {
+        if ("FINALIZADA".equals(status)) {
+            throw new IllegalStateException("Não é possível adicionar arquivos a submissão finalizada.");
         }
         return persistence.uploadFile(localFile, folderId);
     }
 
-    public void deleteFile(Student student, String fileId) throws IOException {
-        if (student.hasSubmitted()) {
-            throw new IllegalStateException("Aluno já submeteu: não pode excluir arquivos.");
+    /**
+     * Exclui arquivo, desde que a solicitação não esteja finalizada.
+     */
+    public void deleteFile(String fileId, String status) throws IOException {
+        if ("FINALIZADA".equals(status)) {
+            throw new IllegalStateException("Não é possível excluir arquivos de submissão finalizada.");
         }
         persistence.deleteFile(fileId);
     }
 
-    public void finalizeSubmission(Student student, String folderId) throws IOException {
-        // Marca o estudante como submetido e aplica read-only em todos os arquivos
-        student.setSubmitted(true);
+    /**
+     * Finaliza submissão: marca todos os arquivos como read-only.
+     */
+    public void finalizeSubmission(String folderId) throws IOException {
         FileList files = persistence.listFilesInFolder(folderId);
         if (files != null && files.getFiles() != null) {
             for (com.google.api.services.drive.model.File f : files.getFiles()) {
@@ -51,8 +61,11 @@ public class FileService {
     public String getFileLink(String fileId) throws IOException {
         return persistence.getFileLink(fileId);
     }
-
-    public void backupDatabase(java.io.File dbDump, String backupFolderId) throws IOException {
-        persistence.backupDatabase(dbDump, backupFolderId);
+        /**
+     * Cria backup do banco de dados e faz upload para a pasta.
+     */
+    public String backupDatabase(java.io.File dumpFile, String folderId) throws IOException {
+        // Faz upload do dump para a pasta, servindo como backup
+        return persistence.uploadFile(dumpFile, folderId);
     }
 }

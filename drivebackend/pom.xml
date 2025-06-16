@@ -1,23 +1,24 @@
+<!-- drivebackend/pom.xml -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- Herdamos do Spring Boot Starter Parent -->
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.4</version>
-    <relativePath/>
+    <groupId>com.exemplo</groupId>
+    <artifactId>ods2-root</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <groupId>com.exemplo</groupId>
   <artifactId>google-drive-integration</artifactId>
-  <version>1.0.0</version>
+  <name>google-drive-integration</name>
+  <description>Componente de integração com Google Drive</description>
 
   <properties>
-    <java.version>11</java.version>
+    <!-- Garante que o compile use o release do parent -->
+    <java.version>${maven.compiler.release}</java.version>
   </properties>
 
   <dependencies>
@@ -48,7 +49,7 @@
       <version>1.19.0</version>
     </dependency>
 
-    <!-- ==== Spring Boot Starters ==== -->
+    <!-- ==== Spring Boot Starters (apenas para código, não repackage) ==== -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -58,53 +59,26 @@
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
-  <!-- H2 para testes JPA em memória -->
-  <dependency>
-    <groupId>com.h2database</groupId>
-    <artifactId>h2</artifactId>
-    <scope>test</scope>
-  </dependency>
+    <!-- H2 para testes JPA em memória -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <!-- ==== Testes ==== -->
-    <!-- Este starter já traz JUnit5, Mockito Core, AssertJ, Hamcrest, Jackson, Spring Test, JSON-Path, etc. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <!-- não excluímos nada -->
     </dependency>
-
-    <!-- Extensão do Mockito para JUnit5: contém MockitoExtension -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
       <version>5.17.0</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
-  <build>
-    <plugins>
-      <!-- Plugin do Spring Boot -->
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-
-      <!-- Configuração do compilador -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <compilerArgs>
-            <arg>-parameters</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <!-- Sem nenhum plugin de repackage aqui! -->
 </project>
