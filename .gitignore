@@ -22,3 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+drivebackend/src/main/resources/credentials.json
+drivebackend/target/classes/credentials.json
