@@ -6,6 +6,7 @@ import AuthService from "../services/auth.service";
 export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState("");
+  const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   const handleAuthAction = () => {
@@ -19,6 +20,9 @@ export default function Header() {
   };
 
   useEffect(() => {
+    const saved = localStorage.getItem("theme") || "light";
+    setTheme(saved);
+    document.documentElement.classList.add(`theme-${saved}`);
     const user = AuthService.getCurrentUser(); // ou checar token/localStorage
     console.log(user.name);
     if (user) {
@@ -32,6 +36,16 @@ export default function Header() {
       }
     }
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+
+    document.documentElement.classList.remove(`theme-${theme}`);
+    document.documentElement.classList.add(`theme-${newTheme}`);
+
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
 
   return (
     <header className="br-header small fixed top-0 w-full">
@@ -48,6 +62,7 @@ export default function Header() {
                 className="br-button circle small"
                 type="button"
                 aria-label="Funcionalidade 4"
+                onClick={toggleTheme}
               >
                 <i className="fas fa-adjust" aria-hidden="true"></i>
               </button>
