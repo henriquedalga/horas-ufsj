@@ -13,8 +13,32 @@ export default function Initial() {
   }, []);
   return (
     <div className="initial-wrapper min-h-screen w-screen flex items-center justify-center flex-col ">
-      <div className="w-30 ">
-        <img src="/UFSJ.png" alt="logo" />
+      <div className="flex flex-row align-items-center ">
+        <div className="col-auto ">
+          <img
+            src="/UFSJ.png"
+            alt="logo"
+            style={{ height: "100px", width: "auto" }}
+          />
+        </div>
+        <div className="col-auto">
+          <span
+            className="br-divider vertical"
+            style={{
+              height: "100px",
+              display: "inline-block",
+              marginLeft: "8px",
+              marginRight: "8px",
+            }}
+          ></span>
+        </div>
+        <div className="col-auto">
+          <img
+            src="/Ccomp.png"
+            alt="logo"
+            style={{ height: "100px", width: "auto" }}
+          />
+        </div>
       </div>
 
       <div className="br-tab pt-6">

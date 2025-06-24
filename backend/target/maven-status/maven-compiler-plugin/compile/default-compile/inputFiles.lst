@@ -1,0 +1,12 @@
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/HorasUfsjApplication.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/controller/AuthController.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/entity/Arquivo.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/entity/Funcionario.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/entity/HoraTipo.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/entity/Solicitacao.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/repository/ArquivoRepository.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/repository/FuncionarioRepository.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/repository/SolicitacaoRepository.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/service/ArquivoService.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/service/AuthService.java
+/Users/henriquedalga/Desktop/horas-ufsj/backend/src/main/java/com/universidade/sighoras/service/SolicitacaoService.java

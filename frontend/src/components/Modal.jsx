@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 
-export default function Modal({ isOpen, onClose, nome, arquivos }) {
+import AdminService from "../services/admin.service";
+
+export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
   const [respostas, setRespostas] = useState([]);
 
   useEffect(() => {
     if (isOpen && arquivos.length > 0) {
       setRespostas(
-        arquivos.map(() => ({
-          status: "",
+        arquivos.map((arquivo) => ({
+          status: arquivo.status || "",
           comentario: "",
         }))
       );
@@ -25,6 +27,22 @@ export default function Modal({ isOpen, onClose, nome, arquivos }) {
     atualizadas[index].comentario = comentario;
     setRespostas(atualizadas);
   };
+
+  async function handleSubmit() {
+    const dataAtualizada = {
+      arquivos: respostas,
+    };
+
+    try {
+      if (tipo === "complementar") {
+        await AdminService.postComplementarById(id, dataAtualizada);
+      } else {
+        await AdminService.postExtensaoById(id, dataAtualizada);
+      }
+    } catch (error) {
+      console.error("Erro ao enviar respostas:", error);
+    }
+  }
 
   if (!isOpen) return null;
 
@@ -101,7 +119,11 @@ export default function Modal({ isOpen, onClose, nome, arquivos }) {
           <button className="br-button secondary" onClick={onClose}>
             Cancelar
           </button>
-          <button className="br-button primary mt-3 mt-sm-0 ml-sm-3">
+          <button
+            className="br-button primary mt-3 mt-sm-0 ml-sm-3"
+            type="button"
+            onClick={handleSubmit}
+          >
             Retornar
           </button>
         </div>

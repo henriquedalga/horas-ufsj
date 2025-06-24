@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import Header from "../components/Header";
 import Modal from "../components/Modal";
-import { getAlunoById, getAlunos } from "../services/api";
+import AdminService from "../services/admin.service";
 
 export default function Admin() {
   const [modalInfo, setModalInfo] = useState({
@@ -10,15 +10,18 @@ export default function Admin() {
     nome: "",
     arquivos: [],
   });
-  const [items, setItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFiltro, setStatusFiltro] = useState("TODOS");
+
+  const [itemsExtensao, setItemsExtensao] = useState([]);
+  const [itemsComplementar, setItemsComplementar] = useState([]);
+  const [searchExtensao, setSearchExtensao] = useState("");
+  const [searchComplementar, setSearchComplementar] = useState("");
+  const [statusFiltroExtensao, setStatusFiltroExtensao] = useState("TODOS");
+  const [statusFiltroComplementar, setStatusFiltroComplementar] =
+    useState("TODOS");
 
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user || !user.authToken) {
-      console.error("Usuário não autentticado" + user + user.authToken);
-      alert("Você precisa estar logado para acessar esta página.");
       window.location.href = "/main";
     }
     if (window.core?.BRTab) {
@@ -29,9 +32,11 @@ export default function Admin() {
     }
     async function fetchAlunos() {
       try {
-        const data = await getAlunos();
-        console.log("Alunos:", data);
-        setItems(data);
+        const extensao = await AdminService.getExtensao();
+        console.log("Alunos:", extensao);
+        setItemsExtensao(extensao);
+        const complementar = await AdminService.getComplementar();
+        setItemsComplementar(complementar);
       } catch (err) {
         console.error("Erro ao buscar alunos:", err);
       }
@@ -48,17 +53,38 @@ export default function Admin() {
         itemList.push(new window.core.BRItem("br-item", brItem));
       }
     }
-  }, [items]);
+  }, [itemsExtensao, itemsComplementar]);
 
-  const openModalWithData = async (id) => {
+  const openModalExtensao = async (id) => {
     try {
-      const response = await getAlunoById(id);
-      const arquivos = response.arquivos || [];
-      const nome = response.nome || "Aluno sem nome";
+      const response = await AdminService.getExtensaoById(id);
+      const nome = response?.nome || "";
+      const arquivos = response?.arquivos || [];
+      const tipo = "extensao";
       setModalInfo({
         isOpen: true,
         nome,
+        id,
         arquivos,
+        tipo,
+      });
+    } catch (error) {
+      console.error("Erro ao buscar arquivos do aluno:", error);
+    }
+  };
+
+  const openModalComplementar = async (id) => {
+    try {
+      const response = await AdminService.getComplementarById(id);
+      const nome = response?.nome || "";
+      const arquivos = response?.arquivos || [];
+      const tipo = "complementar";
+      setModalInfo({
+        isOpen: true,
+        nome,
+        id,
+        arquivos,
+        tipo,
       });
     } catch (error) {
       console.error("Erro ao buscar arquivos do aluno:", error);
@@ -100,8 +126,8 @@ export default function Admin() {
                     id="searchbox-26212"
                     type="text"
                     placeholder="O que você procura?"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchExtensao}
+                    onChange={(e) => setSearchExtensao(e.target.value)}
                   />
                   <button
                     className="br-button circle small"
@@ -117,9 +143,11 @@ export default function Admin() {
                       <input
                         id="radio-01"
                         type="radio"
-                        name="radio"
+                        name="radio-extensao"
                         value="PENDENTE"
-                        onChange={(e) => setStatusFiltro(e.target.value)}
+                        onChange={(e) =>
+                          setStatusFiltroExtensao(e.target.value)
+                        }
                       />
                       <label for="radio-01">Abertos</label>
                     </div>
@@ -129,9 +157,11 @@ export default function Admin() {
                       <input
                         id="radio-02"
                         type="radio"
-                        name="radio"
+                        name="radio-extensao"
                         value="APROVADO"
-                        onChange={(e) => setStatusFiltro(e.target.value)}
+                        onChange={(e) =>
+                          setStatusFiltroExtensao(e.target.value)
+                        }
                       />
                       <label for="radio-02">Concluídos</label>
                     </div>
@@ -141,9 +171,11 @@ export default function Admin() {
                       <input
                         id="radio-03"
                         type="radio"
-                        name="radio"
+                        name="radio-extensao"
                         value="TODOS"
-                        onChange={(e) => setStatusFiltro(e.target.value)}
+                        onChange={(e) =>
+                          setStatusFiltroExtensao(e.target.value)
+                        }
                         defaultChecked
                       />
                       <label for="radio-03">Ambos</label>
@@ -152,35 +184,134 @@ export default function Admin() {
                 </div>
                 <span className="br-divider"></span>
 
-                {items
+                {itemsExtensao
                   .filter((item) =>
-                    item.nome.toLowerCase().includes(searchTerm.toLowerCase())
+                    item.nome
+                      .toLowerCase()
+                      .includes(searchExtensao.toLowerCase())
                   )
                   .filter((item) =>
-                    statusFiltro === "TODOS"
+                    statusFiltroExtensao === "TODOS"
                       ? true
-                      : item.status === statusFiltro
+                      : item.status === statusFiltroExtensao
                   )
                   .map((item) => (
-                    <>
+                    <Fragment key={item.id}>
                       <button
-                        className="br-item min-h-12"
-                        onClick={() => openModalWithData(item.id)}
+                        className="br-item min-h-12 "
+                        onClick={() => openModalExtensao(item.id)}
                         key={item.id}
                         disabled={
                           item.status === "APROVADO" ||
                           item.status === "REPROVADO"
                         }
                       >
-                        {item.nome}
+                        <div class="row align-items-center">
+                          <div class="col">{item.nome}</div>
+                          <div class="col-auto">{item.status}</div>
+                        </div>
                       </button>
                       <span className="br-divider"></span>
-                    </>
+                    </Fragment>
                   ))}
               </div>
             </div>
             <div className="tab-panel" id="panel-2">
-              <div className="pt-4">/////////</div>
+              <div className="pt-4">
+                <div className="br-input has-icon pb-2">
+                  <input
+                    id="searchbox-Complementar"
+                    type="text"
+                    placeholder="O que você procura?"
+                    value={searchComplementar}
+                    onChange={(e) => setSearchComplementar(e.target.value)}
+                  />
+                  <button
+                    className="br-button circle small"
+                    type="button"
+                    aria-label="Pesquisar"
+                  >
+                    <i className="fas fa-search" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div className="flex flex-row pb-4">
+                  <div className="br-item" data-toggle="selection">
+                    <div className="br-radio ">
+                      <input
+                        id="radio-04"
+                        type="radio"
+                        name="radio-complementar"
+                        value="PENDENTE"
+                        onChange={(e) =>
+                          setStatusFiltroComplementar(e.target.value)
+                        }
+                      />
+                      <label for="radio-04">Abertos</label>
+                    </div>
+                  </div>
+                  <div className="br-item" data-toggle="selection">
+                    <div className="br-radio">
+                      <input
+                        id="radio-05"
+                        type="radio"
+                        name="radio-complementar"
+                        value="APROVADO"
+                        onChange={(e) =>
+                          setStatusFiltroComplementar(e.target.value)
+                        }
+                      />
+                      <label for="radio-05">Concluídos</label>
+                    </div>
+                  </div>
+                  <div className="br-item" data-toggle="selection">
+                    <div className="br-radio">
+                      <input
+                        id="radio-06"
+                        type="radio"
+                        name="radio-complementar"
+                        value="TODOS"
+                        onChange={(e) =>
+                          setStatusFiltroComplementar(e.target.value)
+                        }
+                        defaultChecked
+                      />
+                      <label for="radio-06">Ambos</label>
+                    </div>
+                  </div>
+                </div>
+                <span className="br-divider"></span>
+
+                {itemsComplementar
+                  .filter((item) =>
+                    item.nome
+                      .toLowerCase()
+                      .includes(searchExtensao.toLowerCase())
+                  )
+                  .filter((item) =>
+                    statusFiltroComplementar === "TODOS"
+                      ? true
+                      : item.status === statusFiltroComplementar
+                  )
+                  .map((item) => (
+                    <Fragment key={item.id}>
+                      <button
+                        className="br-item min-h-12 "
+                        onClick={() => openModalComplementar(item.id)}
+                        key={item.id}
+                        disabled={
+                          item.status === "APROVADO" ||
+                          item.status === "REPROVADO"
+                        }
+                      >
+                        <div class="row align-items-center">
+                          <div class="col">{item.nome}</div>
+                          <div class="col-auto">{item.status}</div>
+                        </div>
+                      </button>
+                      <span className="br-divider"></span>
+                    </Fragment>
+                  ))}
+              </div>
             </div>
           </div>
         </div>

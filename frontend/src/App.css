@@ -22,3 +22,51 @@
   width: auto;
   padding-right: 20px;
 }
+
+@media (min-width: 576px) {
+  .br-header .header-logo {
+    --header-logo-size: var(--header-logo-large);
+  }
+}
+
+:root.theme-light {
+  --background: var(--background-light);
+  --background-rgb: var(--background-light-rgb);
+  --color: var(--color-light);
+  --color-rgb: var(--color-light-rgb);
+  --interactive: var(--interactive-light);
+  --interactive-rgb: var(--interactive-light-rgb);
+  --hover: var(--hover-light);
+  --pressed: var(--pressed-light);
+  --focus-color: var(--focus-color-light);
+  --visited: var(--visited-light);
+  --pressed-effect: linear-gradient(
+    rgba(var(--interactive-light-rgb), var(--pressed-light)),
+    rgba(var(--interactive-light-rgb), var(--pressed-light))
+  );
+  --hover-effect: linear-gradient(
+    rgba(var(--interactive-light-rgb), var(--hover-light)),
+    rgba(var(--interactive-light-rgb), var(--hover-light))
+  );
+}
+
+:root.theme-dark {
+  --background: var(--background-dark);
+  --background-rgb: var(--background-dark-rgb);
+  --color: var(--color-dark);
+  --color-rgb: var(--color-dark-rgb);
+  --interactive: var(--interactive-dark);
+  --interactive-rgb: var(--interactive-dark-rgb);
+  --hover: var(--hover-dark);
+  --pressed: var(--pressed-dark);
+  --focus-color: var(--focus-color-dark);
+  --visited: var(--visited-dark);
+  --pressed-effect: linear-gradient(
+    rgba(var(--interactive-dark-rgb), var(--pressed-dark)),
+    rgba(var(--interactive-dark-rgb), var(--pressed-dark))
+  );
+  --hover-effect: linear-gradient(
+    rgba(var(--interactive-dark-rgb), var(--hover-dark)),
+    rgba(var(--interactive-dark-rgb), var(--hover-dark))
+  );
+}
