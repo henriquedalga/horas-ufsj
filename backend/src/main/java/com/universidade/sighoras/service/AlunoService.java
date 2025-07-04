@@ -28,7 +28,7 @@ public class AlunoService {
     private final SolicitacaoRepository solicitacaoRepo;
     private final ArquivoRepository arquivoRepo;
 
-    private static final String PASTA_RAIZ_DRIVE = "1ABC123XYZ_FOLDER_ID_AQUI";
+    private static final String PASTA_RAIZ_DRIVE = "1TIFxvdsCFWpB9xeXK6mx59Csp5MuDJlN";
 
     public AlunoService(FileService fileService,
                         SolicitacaoRepository solicitacaoRepo,
@@ -122,7 +122,9 @@ public class AlunoService {
                             HttpStatus.NOT_FOUND,
                             "Solicitação não encontrada ID: " + id
                     ));
-            fileService.finalizeSubmission(sol.getLinkPasta());
+            String pastaLink = sol.getLinkPasta(); 
+            String pastaId   = pastaLink.substring(pastaLink.lastIndexOf('/') + 1);
+            fileService.finalizeSubmission(pastaId);
             sol.setStatus("FINALIZADA");
             sol.setResposta(comentario);
             sol = solicitacaoRepo.save(sol);
