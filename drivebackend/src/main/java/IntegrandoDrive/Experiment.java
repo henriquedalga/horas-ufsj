@@ -18,7 +18,6 @@ public class Experiment {
             DrivePersistence persistence = new DrivePersistence(drive);
             FileService fileService = new FileService(persistence);
 
-            // ----- substitui Student por simples nome -----
             String nomeAluno   = "João";
             String parentId    = "1TIFxvdsCFWpB9xeXK6mx59Csp5MuDJlN";
 
