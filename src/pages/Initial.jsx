@@ -49,7 +49,7 @@ export default function Initial() {
                 <span className="name">
                   <span className="d-flex flex-column flex-sm-row">
                     <span className="icon mb-1 mb-sm-0 mr-sm-1">
-                      <i className="fas fa-image" aria-hidden="true"></i>
+                      <i className="fas fa-user" aria-hidden="true"></i>
                     </span>
                     <span className="name">Aluno</span>
                   </span>
@@ -61,7 +61,7 @@ export default function Initial() {
                 <span className="name">
                   <span className="d-flex flex-column flex-sm-row">
                     <span className="icon mb-1 mb-sm-0 mr-sm-1">
-                      <i className="fas fa-image" aria-hidden="true"></i>
+                      <i className="fas fa-user-tie" aria-hidden="true"></i>
                     </span>
                     <span className="name">Admin</span>
                   </span>
@@ -72,7 +72,23 @@ export default function Initial() {
         </nav>
         <div className="tab-content">
           <div className="tab-panel active" id="panel-1-icon">
-            <Login tipo="student" />
+            <div className="login-wrapper flex items-center justify-center shadow-md rounded-b-lg">
+              {" "}
+              <a
+                href={`${
+                  import.meta.env.VITE_SSO_BASE_URL
+                }/auth/oauth/sso/login?clientId=${
+                  import.meta.env.VITE_SSO_CLIENT_ID
+                }`}
+                className="br-button primary"
+              >
+                <i className="fas fa-city" aria-hidden="true"></i>
+                <span className="ml-1">Login com SSO</span>
+              </a>
+            </div>
+
+            {/* 
+            <Login tipo="student" /> */}
           </div>
           <div className="tab-panel" id="panel-2-icon">
             <Login tipo="admin" />
