@@ -102,7 +102,7 @@ export default function Header() {
             <div className="header-info">
               <div className="header-title">Entrega de Horas UFSJ</div>
               <div className="header-subtitle">
-                Olá, {userName || "Usuário não identificado"}
+                
               </div>
             </div>
           </div>
