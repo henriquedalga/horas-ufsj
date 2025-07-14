@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import AuthService from "../services/auth.service";
 
 export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   const handleAuthAction = () => {
@@ -17,8 +20,15 @@ export default function Header() {
   };
 
   useEffect(() => {
-    const user = AuthService.getCurrentUser?.(); // ou checar token/localStorage
-    setIsAuthenticated(!!user);
+    const saved = localStorage.getItem("theme") || "light";
+    setTheme(saved);
+    document.documentElement.classList.add(`theme-${saved}`);
+    const user = AuthService.getCurrentUser(); // ou checar token/localStorage
+    console.log(user.name);
+    if (user) {
+      setIsAuthenticated(true);
+      setUserName(user.name); // substitua "nome" pela chave correta se for diferente
+    }
     if (window.core?.BRHeader) {
       const headerList = [];
       for (const brHeader of window.document.querySelectorAll(".br-header")) {
@@ -27,29 +37,35 @@ export default function Header() {
     }
   }, []);
 
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+
+    document.documentElement.classList.remove(`theme-${theme}`);
+    document.documentElement.classList.add(`theme-${newTheme}`);
+
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
+
   return (
-    <header className="br-header compact fixed top-0 w-full">
+    <header className="br-header small fixed top-0 w-full">
       <div className="container-lg">
         <div className="header-top">
           <div className="header-logo">
-            <img src="/Ccomp.png" alt="logo" />
+            <img src="/UFSJ.png" alt="logo" />
             <span className="br-divider vertical"></span>
-            <div className="header-sign">Assinatura</div>
+            <img src="/Ccomp.png" alt="logo" />
           </div>
           <div className="header-actions">
-            <div className="header-functions ">
-              <div className="br-list">
-                <div className="br-item">
-                  <button
-                    className="br-button circle small"
-                    type="button"
-                    aria-label="Funcionalidade 4"
-                  >
-                    <i className="fas fa-adjust" aria-hidden="true"></i>
-                    <span className="text">Funcionalidade 4</span>
-                  </button>
-                </div>
-              </div>
+            <div className="br-item">
+              <button
+                className="br-button circle small"
+                type="button"
+                aria-label="Funcionalidade 4"
+                onClick={toggleTheme}
+              >
+                <i className="fas fa-adjust" aria-hidden="true"></i>
+              </button>
             </div>
 
             <div className="header-login">
@@ -85,7 +101,9 @@ export default function Header() {
             </div>
             <div className="header-info">
               <div className="header-title">Entrega de Horas UFSJ</div>
-              <div className="header-subtitle">Subtítulo do Header</div>
+              <div className="header-subtitle">
+                Olá, {userName || "Usuário não identificado"}
+              </div>
             </div>
           </div>
         </div>

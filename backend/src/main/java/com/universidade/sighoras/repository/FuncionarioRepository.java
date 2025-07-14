@@ -6,6 +6,4 @@ import com.universidade.sighoras.entity.Funcionario;
 public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> {
     Funcionario findByEmail(String email);
     
-    Funcionario findByNome(String nome);
-    
 }
