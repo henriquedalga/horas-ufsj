@@ -68,6 +68,19 @@
             <artifactId>google-drive-integration</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <!-- Mockito para testes de unidade -->
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-core</artifactId>
+          <version>5.17.0</version>
+          <scope>compile</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito-junit-jupiter</artifactId>
+          <version>5.17.0</version>
+          <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

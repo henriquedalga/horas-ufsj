@@ -2,21 +2,44 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.exemplo</groupId>
   <artifactId>google-drive-integration</artifactId>
   <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <!-- 1) Importa o BOM do Spring Boot para versionamento automático dos starters -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>3.5.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <properties>
+    <java.version>11</java.version>
+  </properties>
 
   <dependencies>
+    <!-- Spring Web: traz as anotações @RestController, RequestMapping, ResponseEntity, MultipartFile etc. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
     <!-- Google Drive API -->
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-drive</artifactId>
       <version>v3-rev20250427-2.0.0</version>
     </dependency>
-
-    <!-- JSON + HTTP Client para a Drive API -->
     <dependency>
       <groupId>com.google.http-client</groupId>
       <artifactId>google-http-client</artifactId>
@@ -38,7 +61,12 @@
       <version>1.19.0</version>
     </dependency>
 
-    <!-- Test dependencies -->
+    <!-- Testes -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -73,13 +101,13 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.10.1</version>
         <configuration>
-          <source>11</source>
-          <target>11</target>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
           <useModulePath>false</useModulePath>
         </configuration>
       </plugin>
 
-      <!-- Surefire para rodar JUnit 5 -->
+      <!-- Surefire para JUnit 5 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
