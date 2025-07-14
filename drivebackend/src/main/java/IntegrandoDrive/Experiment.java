@@ -18,44 +18,47 @@ public class Experiment {
             DrivePersistence persistence = new DrivePersistence(drive);
             FileService fileService = new FileService(persistence);
 
-            String nomeAluno   = "João";
-            String parentId    = "1TIFxvdsCFWpB9xeXK6mx59Csp5MuDJlN";
+            String nomeAluno = "João";
+            String parentId  = "1TIFxvdsCFWpB9xeXK6mx59Csp5MuDJlN";
 
             // 3) cria (ou obtém) a pasta do aluno
             String pastaId = fileService.createFolder(nomeAluno, parentId);
             System.out.println(">> Pasta criada ou existente: " + pastaId);
 
             // 4) faz upload de um arquivo qualquer
-            File arquivo = new File("/home/naan/IC/ODS/teste.pdf");
-            String firstFileId = fileService.uploadFile(arquivo, pastaId, "EM_PROCESSAMENTO");
+            File arquivo = new File("teste.pdf");
+            String firstFileId = fileService.uploadFile(arquivo, pastaId);
             System.out.println(">> Arquivo enviado: " + firstFileId);
 
-            // 5) exclui e re‑envia
-            fileService.deleteFile(firstFileId, "EM_PROCESSAMENTO");
+            // 5) exclui e re‑envia (ainda EM_PROCESSAMENTO)
+            fileService.deleteFile(firstFileId);
             System.out.println(">> Arquivo excluído: " + firstFileId);
 
-            String newFileId = fileService.uploadFile(arquivo, pastaId, "EM_PROCESSAMENTO");
+            String newFileId = fileService.uploadFile(arquivo, pastaId);
             System.out.println(">> Arquivo reenviado: " + newFileId);
 
-            // 6) finaliza submissão
+            // 6) finaliza submissão (torna todos os arquivos read-only)
             fileService.finalizeSubmission(pastaId);
             System.out.println(">> Submissão finalizada para: " + nomeAluno);
 
-            // 7) tenta operações proibidas após finalização
-            try {
-                fileService.uploadFile(arquivo, pastaId, "FINALIZADA");
-            } catch (IllegalStateException e) {
-                System.out.println("⛔ " + e.getMessage());
+            // 7) tenta operações proibidas após finalização (status FINALIZADA)
+            if (fileService.isFolderReadOnly(pastaId)) {
+                System.out.println(" Pasta está em modo somente leitura (submetido)");
+            } else {
+                System.err.println("ERRO: Pasta deveria estar em modo somente leitura!");
             }
-            try {
-                fileService.deleteFile(newFileId, "FINALIZADA");
-            } catch (IllegalStateException e) {
-                System.out.println("⛔ " + e.getMessage());
+            // 8) rejeita submissão (torna todos editáveis de novo)
+            fileService.rejectSubmission(pastaId);
+            System.out.println(">> Submissão rejeitada para: " + nomeAluno);
+            if (!fileService.isFolderReadOnly(pastaId)) {
+                System.out.println("Pasta voltou a ser editável após rejeição");
+            } else {
+                System.err.println("ERRO: Pasta ainda está em modo somente leitura!");
             }
 
-            // 8) imprime links
+            // 9) imprime links
             System.out.println(">> Link da pasta: " + fileService.getFolderLink(pastaId));
-            System.out.println(">> Link do arquivo: " + fileService.getFileLink(newFileId));
+            System.out.println(">> Link do arquivo existente: " + fileService.getFileLink(newFileId));
 
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
