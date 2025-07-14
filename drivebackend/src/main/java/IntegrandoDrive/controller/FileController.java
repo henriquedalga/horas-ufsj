@@ -20,78 +20,71 @@ public class FileController {
         this.fileService = fileService;
     }
 
-    /**
-     * Faz upload de um único arquivo, desde que a solicitação ainda não esteja finalizada.
+    /** 
+     * Faz upload de arquivo, desde que a solicitação não esteja finalizada.
      */
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
-            @RequestParam MultipartFile file,
-            @RequestParam String folderId,
-            @RequestParam String status
+        @RequestParam MultipartFile file,
+        @RequestParam String folderId
     ) throws IOException {
-        // converte MultipartFile em File temporário
         File temp = new File(TMP_DIR, file.getOriginalFilename());
         file.transferTo(temp);
         try {
-            String fileId = fileService.uploadFile(temp, folderId, status);
+            String fileId = fileService.uploadFile(temp, folderId);
             return ResponseEntity.ok(fileId);
         } catch (IllegalStateException ex) {
-            // mapeia erro de submissão finalizada para 500
             return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ex.getMessage());
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
         } finally {
             temp.delete();
         }
     }
 
-    /**
-     * Exclui um arquivo do Drive, desde que a solicitação não esteja finalizada.
+    /** 
+     * Exclui um arquivo, desde que a solicitação não esteja finalizada.
      */
     @DeleteMapping("/{fileId}")
     public ResponseEntity<Void> deleteFile(
-            @PathVariable String fileId,
-            @RequestParam String status
+        @PathVariable String fileId,
+        @RequestParam String status
     ) throws IOException {
         try {
-            fileService.deleteFile(fileId, status);
+            fileService.deleteFile(fileId);
             return ResponseEntity.noContent().build();
         } catch (IllegalStateException ex) {
-            // mapeia erro de submissão finalizada para 400
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .build();
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
         }
     }
 
-    /**
-     * Marca todos os arquivos de uma pasta como read‑only (finaliza submissão).
-     */
+    /** Marca todos os arquivos como read‑only (finaliza submissão). */
     @PostMapping("/finalize")
     public ResponseEntity<Void> finalizeSubmission(
-            @RequestParam String folderId
+        @RequestParam String folderId
     ) throws IOException {
         fileService.finalizeSubmission(folderId);
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Retorna o link público de uma pasta no Drive.
-     */
-    @GetMapping("/folder/{folderId}/link")
-    public ResponseEntity<String> getFolderLink(
-            @PathVariable String folderId
+    /** Rejeita submissão (torna todos os arquivos editáveis de novo). */
+    @PostMapping("/reject")
+    public ResponseEntity<Void> rejectSubmission(
+        @RequestParam String folderId
     ) throws IOException {
+        fileService.rejectSubmission(folderId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/folder/{folderId}/link")
+    public ResponseEntity<String> getFolderLink(@PathVariable String folderId) throws IOException {
         return ResponseEntity.ok(fileService.getFolderLink(folderId));
     }
 
-    /**
-     * Retorna o link público de um arquivo no Drive.
-     */
     @GetMapping("/file/{fileId}/link")
-    public ResponseEntity<String> getFileLink(
-            @PathVariable String fileId
-    ) throws IOException {
+    public ResponseEntity<String> getFileLink(@PathVariable String fileId) throws IOException {
         return ResponseEntity.ok(fileService.getFileLink(fileId));
     }
 }

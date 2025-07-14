@@ -1,7 +1,6 @@
 package IntegrandoDrive.service;
 
 import IntegrandoDrive.persistence.DrivePersistence;
-import com.google.api.services.drive.model.FileList;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,20 +24,14 @@ public class FileService {
     /**
      * Faz upload de arquivo, desde que a solicitação não esteja finalizada.
      */
-    public String uploadFile(java.io.File localFile, String folderId, String status) throws IOException {
-        if ("FINALIZADA".equals(status)) {
-            throw new IllegalStateException("Não é possível adicionar arquivos a submissão finalizada.");
-        }
+    public String uploadFile(java.io.File localFile, String folderId) throws IOException {
         return persistence.uploadFile(localFile, folderId);
     }
 
     /**
      * Exclui arquivo, desde que a solicitação não esteja finalizada.
      */
-    public void deleteFile(String fileId, String status) throws IOException {
-        if ("FINALIZADA".equals(status)) {
-            throw new IllegalStateException("Não é possível excluir arquivos de submissão finalizada.");
-        }
+    public void deleteFile(String fileId) throws IOException {
         persistence.deleteFile(fileId);
     }
 
@@ -46,12 +39,11 @@ public class FileService {
      * Finaliza submissão: marca todos os arquivos como read-only.
      */
     public void finalizeSubmission(String folderId) throws IOException {
-        FileList files = persistence.listFilesInFolder(folderId);
-        if (files != null && files.getFiles() != null) {
-            for (com.google.api.services.drive.model.File f : files.getFiles()) {
-                persistence.setFileReadOnly(f.getId(), "Submissão finalizada");
-            }
-        }
+        persistence.setFolderReadOnly(folderId);
+    }
+
+    public void rejectSubmission(String folderId) throws IOException {
+        persistence.setFolderWritable(folderId);
     }
 
     public String getFolderLink(String folderId) throws IOException {
@@ -60,6 +52,9 @@ public class FileService {
 
     public String getFileLink(String fileId) throws IOException {
         return persistence.getFileLink(fileId);
+    }
+    public boolean isFolderReadOnly(String folderId) throws IOException {
+        return persistence.isFolderReadOnly(folderId);
     }
         /**
      * Cria backup do banco de dados e faz upload para a pasta.
