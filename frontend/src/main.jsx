@@ -1,11 +1,16 @@
+import "./index.css";
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import "./index.css";
-import App from "./App.jsx";
-import "./mocks/axios.mock";
 
-console.log("oi");
+import App from "./App.jsx";
+import { setupMockRoutes } from "./mocks/axios.mock";
+
+if (import.meta.env.MODE !== "production") {
+  console.log("Mock routes setup complete");
+}
+setupMockRoutes();
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>

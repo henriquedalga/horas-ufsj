@@ -1,22 +1,14 @@
-<!-- ods2-root/pom.xml -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- Herdamos do Spring Boot Starter Parent só para versionamento e BOM -->
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.5</version>
-    <relativePath/>
-  </parent>
-
   <groupId>com.exemplo</groupId>
-  <artifactId>ods2-root</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <artifactId>horas-ufsj</artifactId>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
+  <name>Projeto Horas UFSJ</name>
 
   <modules>
     <module>drivebackend</module>
@@ -24,37 +16,30 @@
   </modules>
 
   <properties>
-    <!-- Versão Java para o release -->
-    <maven.compiler.release>19</maven.compiler.release>
-    <!-- Versão do módulo de drive -->
-    <google.drive.integration.version>1.0.0-SNAPSHOT</google.drive.integration.version>
+    <java.version>19</java.version>
+    <spring.boot.version>3.4.5</spring.boot.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-      <!-- Centraliza a versão do módulo google-drive -->
       <dependency>
-        <groupId>com.exemplo</groupId>
-        <artifactId>google-drive-integration</artifactId>
-        <version>${google.drive.integration.version}</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring.boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
-    <plugins>
-      <!-- Compiler plugin herdado por todos os módulos -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
-        <configuration>
-          <release>${maven.compiler.release}</release>
-          <compilerArgs>
-            <arg>-parameters</arg>
-          </compilerArgs>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>

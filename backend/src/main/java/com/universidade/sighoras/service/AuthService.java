@@ -19,14 +19,16 @@ public class AuthService {
     @Autowired
     private FileController fileController;
 
-    public String authFuncionario(String nome, String senha) {
+    public String authFuncionario(String email, String senha) {
         // Aqui você pode implementar a lógica de autenticação do funcionário
         // Por exemplo, verificar se o email e a senha estão corretos
-        funcionario = funcionarioRepository.findByNome(nome);
-        if (senha.matches(funcionario.getSenha())) {
+        System.out.println("Autenticando funcionário com email: " + email + " e senha: " + senha);
+        funcionario = funcionarioRepository.findByEmail(email);
+        System.out.println("Funcionario: " + funcionario);
+        if (funcionario != null && senha.matches(funcionario.getSenha())) {
             return UUID.randomUUID().toString();
         }
-        return "Falha na autenticação do funcionário!";
+        return null; // Retorna null se as credenciais forem inválidas
     }
 
 }
