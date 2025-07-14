@@ -1,10 +1,6 @@
 import api from "./api";
 
 class AdminService {
-  async getStudents() {
-    return await api("/alunos", { method: "GET" });
-  }
-
   async getStudentById(id) {
     return await api(`/aluno/${id}`, { method: "GET" });
   }
@@ -43,6 +39,10 @@ class AdminService {
         "Content-Type": "application/json",
       },
     });
+  }
+
+  async getAdmins() {
+    return await api("/admin", { method: "GET" });
   }
 }
 

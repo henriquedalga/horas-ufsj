@@ -25,7 +25,7 @@ export default function Login({ tipo }) {
     if (window.core?.BRInput) {
       const loginEl = loginInputRef.current;
       const senhaEl = senhaInputRef.current;
-      console.log("senhaEl", senhaEl);
+      // console.log("senhaEl", senhaEl);
 
       if (loginEl && !loginEl.dataset.initialized) {
         new window.core.BRInput("br-input", loginEl);
@@ -33,7 +33,7 @@ export default function Login({ tipo }) {
       }
 
       if (senhaEl && !senhaEl.dataset.initialized) {
-        console.log("senhaEl", senhaEl);
+        // console.log("senhaEl", senhaEl);
         new window.core.BRInput("br-input", senhaEl);
         senhaEl.dataset.initialized = "true";
       }

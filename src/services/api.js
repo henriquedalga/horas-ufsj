@@ -1,8 +1,10 @@
-const baseURL = import.meta.env.VITE_API_URL;
+import storageService from "./storage.service";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeader = () => {
-  const token = sessionStorage.getItem("authToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const token = storageService.getAuthToken();
+  return token ? { Authorization: token } : {};
 };
 
 const api = async (endpoint, options = {}) => {
@@ -12,7 +14,7 @@ const api = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const response = await fetch(`${baseURL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
   });
