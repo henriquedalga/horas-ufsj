@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App.jsx";
+
 // //import { setupMockRoutes } from "./mocks/axios.mock";
 
 // if (import.meta.env.MODE !== "production") {
