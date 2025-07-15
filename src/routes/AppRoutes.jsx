@@ -1,5 +1,6 @@
-import { Navigate,Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
+import AuthCallback from "../pages/AuthCallback";
 import Initial from "../pages/Initial";
 import { AdminRoutes } from "./AdminRoutes";
 import PrivateRoute from "./PrivateRoute";
@@ -11,6 +12,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/main" element={<Initial />} />
+      <Route path="/login" element={<AuthCallback />} />
       {/* <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} /> */}
       <Route

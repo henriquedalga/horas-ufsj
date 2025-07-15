@@ -44,6 +44,14 @@ class AdminService {
   async getAdmins() {
     return await api("/admin", { method: "GET" });
   }
+
+  async addAdmin(adminData) {
+    return await api("/admins", {
+      // ou a rota que você definir
+      method: "POST",
+      body: JSON.stringify(adminData),
+    });
+  }
 }
 
 export default new AdminService();

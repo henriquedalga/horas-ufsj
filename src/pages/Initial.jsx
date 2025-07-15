@@ -1,8 +1,23 @@
+import { faker } from "@faker-js/faker";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Login from "../components/Login";
 
 export default function Initial() {
+  const navigate = useNavigate();
+
+  const ssoLoginUrl = `${
+    import.meta.env.VITE_SSO_BASE_URL
+  }/auth/oauth/sso/login?clientId=${import.meta.env.VITE_SSO_CLIENT_ID}`;
+
+  // A função de simulação para desenvolvimento
+  const handleMockSsoLogin = () => {
+    const fakeUuid = faker.string.uuid();
+    console.log(`[MOCK SSO] Simulando redirect com uuid: ${fakeUuid}`);
+    navigate(`/login?uuid=${fakeUuid}`);
+  };
+
   useEffect(() => {
     if (window.core?.BRTab) {
       const abasList = [];
@@ -63,7 +78,7 @@ export default function Initial() {
                     <span className="icon mb-1 mb-sm-0 mr-sm-1">
                       <i className="fas fa-user-tie" aria-hidden="true"></i>
                     </span>
-                    <span className="name">Admin</span>
+                    <span className="name">Administrador</span>
                   </span>
                 </span>
               </button>
@@ -73,8 +88,25 @@ export default function Initial() {
         <div className="tab-content">
           <div className="tab-panel active" id="panel-1-icon">
             <div className="login-wrapper flex items-center justify-center shadow-md rounded-b-lg">
-              {" "}
-              <a
+              {/* --- LÓGICA CONDICIONAL AQUI --- */}
+              {import.meta.env.MODE === "production" ? (
+                // EM PRODUÇÃO: Renderiza um link <a> para o SSO real
+                <a href={ssoLoginUrl} className="br-button primary">
+                  <i className="fas fa-city" aria-hidden="true"></i>
+                  <span className="ml-1">Login com SSO</span>
+                </a>
+              ) : (
+                // EM DESENVOLVIMENTO: Renderiza um botão <button> com o onClick da simulação
+                <button
+                  type="button"
+                  className="br-button primary"
+                  onClick={handleMockSsoLogin}
+                >
+                  <i className="fas fa-city" aria-hidden="true"></i>
+                  <span className="ml-1">Login com SSO</span>
+                </button>
+              )}
+              {/* <a
                 href={`${
                   import.meta.env.VITE_SSO_BASE_URL
                 }/auth/oauth/sso/login?clientId=${
@@ -84,7 +116,7 @@ export default function Initial() {
               >
                 <i className="fas fa-city" aria-hidden="true"></i>
                 <span className="ml-1">Login com SSO</span>
-              </a>
+              </a> */}
             </div>
 
             {/* 

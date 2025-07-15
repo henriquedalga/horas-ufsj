@@ -100,4 +100,25 @@ export const handlers = [
   // Agora temos um handler explícito para cada rota, ambos usando a mesma lógica.
   http.get(`${API_URL}/admin`, adminModHandler),
   http.get(`${API_URL}/mod`, adminModHandler),
+
+  http.post(`${API_URL}/auth/sso-validate`, async ({ request }) => {
+    const { uuid } = await request.json();
+
+    if (uuid) {
+      console.log(`[MSW] Validando o UUID (falso) ${uuid}`);
+
+      // SUCESSO! Agora usamos o Faker para criar os dados do usuário logado.
+      return HttpResponse.json({
+        user: {
+          id: faker.string.uuid(),
+          name: faker.person.fullName(),
+          email: faker.internet.email(),
+          role: "student", // ou 'mod', etc.
+        },
+        token: `fake-session-token-${faker.string.uuid()}`, // Token da nossa aplicação
+      });
+    }
+
+    return HttpResponse.json({ message: "UUID inválido" }, { status: 400 });
+  }),
 ];

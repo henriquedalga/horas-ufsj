@@ -7,8 +7,18 @@ class StudentService {
     });
   }
 
-  async postFileToStudent(studentId, fileData) {
-    return await api(`/${studentId}/files`, {
+  async postFilesExtensao(fileData) {
+    return await api(`/extensao/files`, {
+      method: "POST",
+      body: JSON.stringify(fileData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  async postFilesComplementar(fileData) {
+    return await api(`/complementa/files`, {
       method: "POST",
       body: JSON.stringify(fileData),
       headers: {

@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from "react";
 
 import Header from "../components/Header";
 import Modal from "../components/Modal";
+import ModalAdmin from "../components/ModalAdmin";
 import AdminService from "../services/admin.service";
 import storageService from "../services/storage.service";
 
@@ -22,6 +23,7 @@ export default function Admin() {
   const [user, setUser] = useState({});
   const [itemsMod, setItemsMod] = useState([]);
   const [selectedModId, setSelectedModId] = useState(null);
+  const [isModalAdminOpen, setIsModalAdminOpen] = useState(false);
 
   // Move handleModSelectionChange here so it's accessible in JSX
   const handleModSelectionChange = (itemId) => {
@@ -31,6 +33,23 @@ export default function Admin() {
     setSelectedModId((prevSelectedId) =>
       prevSelectedId === itemId ? null : itemId
     );
+  };
+
+  const handleOpenAdminModal = () => {
+    setIsModalAdminOpen(true);
+  };
+
+  const handleCloseAdminModal = () => {
+    setIsModalAdminOpen(false);
+  };
+
+  const refetchModData = async () => {
+    try {
+      const admins = await AdminService.getAdmins();
+      setItemsMod(admins);
+    } catch (err) {
+      console.error("Erro ao re-buscar admins:", err);
+    }
   };
 
   useEffect(() => {
@@ -388,9 +407,10 @@ export default function Admin() {
                         className="br-button primary"
                         type="button"
                         aria-label="Adicionar Funcionário"
+                        onClick={handleOpenAdminModal}
                       >
-                        <i className="fas fa-plus" aria-hidden="true"></i>
-                        Adicionar Funcionário
+                        <i className="fas fa-plus pr-2" aria-hidden="true"></i>
+                        Adicionar
                       </button>
                       <button
                         className="br-button secondary ms-2"
@@ -398,8 +418,8 @@ export default function Admin() {
                         aria-label="Remover Funcionário"
                         disabled={!selectedModId}
                       >
-                        <i className="fas fa-minus" aria-hidden="true"></i>
-                        Remover Funcionário
+                        <i className="fas fa-minus pr-2" aria-hidden="true"></i>
+                        Remover
                       </button>
                       <button
                         className="br-button secondary ms-2"
@@ -407,8 +427,8 @@ export default function Admin() {
                         aria-label="Editar Funcionário"
                         disabled={!selectedModId}
                       >
-                        <i className="fas fa-edit" aria-hidden="true"></i>
-                        Editar Funcionário
+                        <i className="fas fa-edit pr-2" aria-hidden="true"></i>
+                        Editar
                       </button>
                     </div>
                   </div>
@@ -447,7 +467,17 @@ export default function Admin() {
           </div>
         </div>
       </div>
-
+      {isModalAdminOpen && (
+        <ModalAdmin
+          // Passe a função de fechar como prop para o modal
+          onClose={handleCloseAdminModal}
+          // Ver passo bônus abaixo
+          onSuccess={() => {
+            refetchModData();
+            handleCloseAdminModal(); // Fecha o modal após o sucesso
+          }}
+        />
+      )}
       <Modal
         isOpen={modalInfo.isOpen}
         onClose={() => setModalInfo({ ...modalInfo, isOpen: false })}

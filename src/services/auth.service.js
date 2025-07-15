@@ -14,6 +14,14 @@ class AuthService {
 
     return data;
   }
+
+  async validateSsoUuid(uuid) {
+    // Nova rota para validação do uuid
+    return await api("/auth/sso-validate", {
+      method: "POST",
+      body: JSON.stringify({ uuid: uuid }),
+    });
+  }
   // Login: envia email e password, recebe token e dados do usuário
   // async login(email, password) {
   //   const response = await api.post("/auth/signin", { email, password });
