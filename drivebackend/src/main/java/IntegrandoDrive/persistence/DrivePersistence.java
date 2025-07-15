@@ -1,6 +1,8 @@
 package IntegrandoDrive.persistence;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.FileContent;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Objects;
 
 @Component
 public class DrivePersistence {
@@ -82,12 +85,22 @@ public class DrivePersistence {
         return uploaded.getId();
     }
 
-    public FileList listFilesInFolder(String folderId) throws IOException {
+    public List<String> listFileLinks(String folderId) throws IOException {
         String q = String.format("'%s' in parents and trashed = false", folderId);
-        return driveService.files().list()
+        // já traz id e webViewLink em uma única chamada
+        FileList list = driveService.files()
+            .list()
             .setQ(q)
-            .setFields("files(id)")
+            .setFields("files(id, webViewLink)")
             .execute();
+
+        if (list.getFiles() == null) {
+            return Collections.emptyList();
+        }
+        return list.getFiles().stream()
+                .map(f -> f.getWebViewLink())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public void deleteFile(String fileId) throws IOException {

@@ -120,6 +120,7 @@
         <version>3.5.1</version>
         <configuration>
           <mainClass>IntegrandoDrive.Experiment</mainClass>
+          <classpathScope>test</classpathScope>
         </configuration>
       </plugin>
     </plugins>
