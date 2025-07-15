@@ -1,4 +1,4 @@
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AuthService from "../services/auth.service";
@@ -25,7 +25,7 @@ export default function Login({ tipo }) {
     if (window.core?.BRInput) {
       const loginEl = loginInputRef.current;
       const senhaEl = senhaInputRef.current;
-      console.log("senhaEl", senhaEl);
+      // console.log("senhaEl", senhaEl);
 
       if (loginEl && !loginEl.dataset.initialized) {
         new window.core.BRInput("br-input", loginEl);
@@ -33,7 +33,7 @@ export default function Login({ tipo }) {
       }
 
       if (senhaEl && !senhaEl.dataset.initialized) {
-        console.log("senhaEl", senhaEl);
+        // console.log("senhaEl", senhaEl);
         new window.core.BRInput("br-input", senhaEl);
         senhaEl.dataset.initialized = "true";
       }
@@ -75,7 +75,7 @@ export default function Login({ tipo }) {
 };
 
   return (
-    <div className="login-wrapper flex items-center justify-center shadow-md rounded-lg">
+    <div className="login-wrapper flex items-center justify-center shadow-md rounded-b-lg">
       <form onSubmit={handleLogin} className=" ">
         <div className="br-input" ref={loginInputRef}>
           <label htmlFor={`input-icon-${tipo}`}>Login</label>
@@ -117,7 +117,8 @@ export default function Login({ tipo }) {
         {erro && <div className="erro">{erro}</div>}
         <div className="pt-4 flex justify-end">
           <button className="br-sign-in primary" type="submit">
-            <i class="fas fa-user" aria-hidden="true"></i>Entrar
+            <i className="fas fa-sign-in-alt mr-0.5" aria-hidden="true"></i>
+            Entrar
           </button>
         </div>
       </form>

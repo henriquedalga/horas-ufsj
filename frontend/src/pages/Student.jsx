@@ -43,20 +43,15 @@ export default function Student() {
           <div className="tab-content">
             <div className="tab-panel active" id="panel-1">
               <div className="pt-4">
-                <Upload />
+                <Upload tipo="extensao" />
               </div>
             </div>
             <div className="tab-panel" id="panel-2">
               <div className="pt-4">
-                <Upload />
+                <Upload tipo="complementar" />
               </div>
             </div>
           </div>
-        </div>
-        <div className="pt-2 flex w-full max-w-lg">
-          <button className="br-button primary ml-auto" type="button">
-            Enviar
-          </button>
         </div>
       </div>
     </>

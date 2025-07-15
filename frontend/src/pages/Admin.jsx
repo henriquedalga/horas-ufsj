@@ -2,7 +2,9 @@ import { Fragment, useEffect, useState } from "react";
 
 import Header from "../components/Header";
 import Modal from "../components/Modal";
+import ModalAdmin from "../components/ModalAdmin";
 import AdminService from "../services/admin.service";
+import storageService from "../services/storage.service";
 
 export default function Admin() {
   const [modalInfo, setModalInfo] = useState({
@@ -18,19 +20,58 @@ export default function Admin() {
   const [statusFiltroExtensao, setStatusFiltroExtensao] = useState("TODOS");
   const [statusFiltroComplementar, setStatusFiltroComplementar] =
     useState("TODOS");
+  const [user, setUser] = useState({});
+  const [itemsMod, setItemsMod] = useState([]);
+  const [selectedModId, setSelectedModId] = useState(null);
+  const [isModalAdminOpen, setIsModalAdminOpen] = useState(false);
+
+  // Move handleModSelectionChange here so it's accessible in JSX
+  const handleModSelectionChange = (itemId) => {
+    // Usamos um operador ternário para a lógica:
+    // Se o ID clicado JÁ É o que está selecionado, desmarque-o (setando para null).
+    // Senão, selecione o novo ID.
+    setSelectedModId((prevSelectedId) =>
+      prevSelectedId === itemId ? null : itemId
+    );
+  };
+
+  const handleOpenAdminModal = () => {
+    setIsModalAdminOpen(true);
+  };
+
+  const handleCloseAdminModal = () => {
+    setIsModalAdminOpen(false);
+  };
+
+  const refetchModData = async () => {
+    try {
+      const admins = await AdminService.getAdmins();
+      setItemsMod(admins);
+    } catch (err) {
+      console.error("Erro ao re-buscar admins:", err);
+    }
+  };
 
   useEffect(() => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
-    if (!user || !user.authToken) {
+    const currentUser = storageService.getUserData();
+    const token = storageService.getAuthToken();
+
+    // A verificação correta é simplesmente checar se o token existe.
+    if (!token) {
+      console.log("Nenhum token encontrado, redirecionando...");
       window.location.href = "/main";
+      return; // Para a execução do useEffect aqui
     }
+    setUser(currentUser);
+
     if (window.core?.BRTab) {
       const abasList = [];
       for (const brTab of window.document.querySelectorAll(".br-tab")) {
         abasList.push(new window.core.BRTab("br-tab", brTab));
       }
     }
-    async function fetchAlunos() {
+
+    const fetchData = async () => {
       try {
         const extensao = await AdminService.getExtensao();
         console.log("Alunos:", extensao);
@@ -40,20 +81,37 @@ export default function Admin() {
       } catch (err) {
         console.error("Erro ao buscar alunos:", err);
       }
-    }
+      if (currentUser.role === "mod") {
+        try {
+          const admins = await AdminService.getAdmins();
+          setItemsMod(admins);
+          console.log("Admins:", admins);
+        } catch (err) {
+          console.error("Erro ao buscar admins:", err);
+        }
+      }
+    };
 
-    fetchAlunos();
+    fetchData();
   }, []);
 
   useEffect(() => {
-    if (window.core?.BRItem) {
+    // Este efeito vai rodar sempre que as listas de itens ou o usuário mudarem.
+    // Isso garante que a biblioteca seja re-inicializada se a estrutura do DOM mudar.
+    if (window.core?.BRItem && window.core?.BRTab) {
+      console.log("Sincronizando bibliotecas de UI (BRTab, BRItem)...");
+
+      const abasList = [];
+      for (const brTab of window.document.querySelectorAll(".br-tab")) {
+        abasList.push(new window.core.BRTab("br-tab", brTab));
+      }
+
       const itemList = [];
-      const brItems = window.document.querySelectorAll(".br-item");
-      for (const brItem of brItems) {
+      for (const brItem of window.document.querySelectorAll(".br-item")) {
         itemList.push(new window.core.BRItem("br-item", brItem));
       }
     }
-  }, [itemsExtensao, itemsComplementar]);
+  }, [user, itemsExtensao, itemsComplementar, itemsMod]);
 
   const openModalExtensao = async (id) => {
     try {
@@ -94,7 +152,7 @@ export default function Admin() {
   return (
     <>
       <Header />
-      <div className="container flex flex-col items-center mx-auto pt-6">
+      <div className="w-11/12 md:container flex flex-col items-center mx-auto pt-6">
         <div className="br-tab w-full max-w-4xl">
           <nav className="tab-nav ">
             <ul>
@@ -116,6 +174,17 @@ export default function Admin() {
                   </span>
                 </button>
               </li>
+              {user.role === "mod" && (
+                <li className="tab-item">
+                  <button type="button" data-panel="panel-3">
+                    <span className="name">
+                      <span className="d-flex flex-column flex-sm-row">
+                        <span className="name">Moderação</span>
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              )}
             </ul>
           </nav>
           <div className="tab-content">
@@ -123,7 +192,7 @@ export default function Admin() {
               <div className="pt-4">
                 <div className="br-input has-icon pb-2">
                   <input
-                    id="searchbox-26212"
+                    id="searchbox-1"
                     type="text"
                     placeholder="O que você procura?"
                     value={searchExtensao}
@@ -195,18 +264,18 @@ export default function Admin() {
                       ? true
                       : item.status === statusFiltroExtensao
                   )
-                  .map((item) => (
-                    <Fragment key={item.id}>
+                  .map((item, index) => (
+                    <Fragment key={index}>
                       <button
-                        className="br-item min-h-12 "
+                        className="br-item"
                         onClick={() => openModalExtensao(item.id)}
-                        key={item.id}
+                        key={index}
                         disabled={
                           item.status === "APROVADO" ||
                           item.status === "REPROVADO"
                         }
                       >
-                        <div class="row align-items-center">
+                        <div class="row  min-h-8 align-items-center">
                           <div class="col">{item.nome}</div>
                           <div class="col-auto">{item.status}</div>
                         </div>
@@ -220,7 +289,7 @@ export default function Admin() {
               <div className="pt-4">
                 <div className="br-input has-icon pb-2">
                   <input
-                    id="searchbox-Complementar"
+                    id="searchbox-2"
                     type="text"
                     placeholder="O que você procura?"
                     value={searchComplementar}
@@ -292,18 +361,18 @@ export default function Admin() {
                       ? true
                       : item.status === statusFiltroComplementar
                   )
-                  .map((item) => (
-                    <Fragment key={item.id}>
+                  .map((item, index) => (
+                    <Fragment key={index}>
                       <button
-                        className="br-item min-h-12 "
+                        className="br-item"
                         onClick={() => openModalComplementar(item.id)}
-                        key={item.id}
+                        key={index}
                         disabled={
                           item.status === "APROVADO" ||
                           item.status === "REPROVADO"
                         }
                       >
-                        <div class="row align-items-center">
+                        <div class="row align-items-center min-h-8">
                           <div class="col">{item.nome}</div>
                           <div class="col-auto">{item.status}</div>
                         </div>
@@ -313,9 +382,102 @@ export default function Admin() {
                   ))}
               </div>
             </div>
+            {user.role === "mod" && (
+              <div className="tab-panel" id="panel-3">
+                <div className="pt-4">
+                  <div className="br-input has-icon pb-2">
+                    <input
+                      id="searchbox-3"
+                      type="text"
+                      placeholder="Quem você procura?"
+                      value={searchExtensao}
+                      // onChange={(e) => setSearchExtensao(e.target.value)}
+                    />
+                    <button
+                      className="br-button circle small"
+                      type="button"
+                      aria-label="Pesquisar"
+                    >
+                      <i className="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div className="pl-6 pr-6">
+                    <div className="flex flex-col md:flex-row pt-2 pb-4 w-full align-items-center justify-between ">
+                      <button
+                        className="br-button primary"
+                        type="button"
+                        aria-label="Adicionar Funcionário"
+                        onClick={handleOpenAdminModal}
+                      >
+                        <i className="fas fa-plus pr-2" aria-hidden="true"></i>
+                        Adicionar
+                      </button>
+                      <button
+                        className="br-button secondary ms-2"
+                        type="button"
+                        aria-label="Remover Funcionário"
+                        disabled={!selectedModId}
+                      >
+                        <i className="fas fa-minus pr-2" aria-hidden="true"></i>
+                        Remover
+                      </button>
+                      <button
+                        className="br-button secondary ms-2"
+                        type="button"
+                        aria-label="Editar Funcionário"
+                        disabled={!selectedModId}
+                      >
+                        <i className="fas fa-edit pr-2" aria-hidden="true"></i>
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                  <span className="br-divider"></span>
+                  {itemsMod.map((item, index) => (
+                    <Fragment key={index}>
+                      <button
+                        key={index}
+                        className={`br-item ${
+                          selectedModId === item.id ? "selected" : ""
+                        }`}
+                        onClick={() => handleModSelectionChange(item.id)}
+                      >
+                        <div className="d-flex flex-row min-h-8 w-full align-items-center justify-between">
+                          <span className="name">{item.nome}</span>
+                          <span className="email align-self-center">
+                            {item.email}
+                          </span>
+                          <div className="ms-auto">
+                            <input
+                              id={`check-${index}`}
+                              name={`check-${index}`}
+                              type="checkbox"
+                              defaultChecked={item.role === "mod"}
+                              className="br-checkbox"
+                            />
+                          </div>
+                        </div>
+                      </button>
+                      <span className="br-divider"></span>
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      {isModalAdminOpen && (
+        <ModalAdmin
+          // Passe a função de fechar como prop para o modal
+          onClose={handleCloseAdminModal}
+          // Ver passo bônus abaixo
+          onSuccess={() => {
+            refetchModData();
+            handleCloseAdminModal(); // Fecha o modal após o sucesso
+          }}
+        />
+      )}
       <Modal
         isOpen={modalInfo.isOpen}
         onClose={() => setModalInfo({ ...modalInfo, isOpen: false })}
