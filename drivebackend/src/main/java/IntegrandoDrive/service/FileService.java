@@ -4,6 +4,7 @@ import IntegrandoDrive.persistence.DrivePersistence;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -55,6 +56,10 @@ public class FileService {
     }
     public boolean isFolderReadOnly(String folderId) throws IOException {
         return persistence.isFolderReadOnly(folderId);
+    }
+
+    public List<String> listFileLinks(String folderId) throws IOException {
+        return persistence.listFileLinks(folderId);
     }
         /**
      * Cria backup do banco de dados e faz upload para a pasta.

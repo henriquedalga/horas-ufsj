@@ -24,6 +24,7 @@ public class SolicitacaoService {
         solicitacao.setNome(nome);
         solicitacao.setEmail(email);
         solicitacao.setHoraTipoStr(horaTipo);
+        solicitacao.setLinkPasta(linkPasta);
         solicitacao.setStatus("Aberta"); // Definindo status inicial como Pendente
         solicitacaoRepository.save(solicitacao);
     }

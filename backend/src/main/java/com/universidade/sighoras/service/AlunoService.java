@@ -1,214 +1,131 @@
 package com.universidade.sighoras.service;
 
-import com.universidade.sighoras.controller.DocumentoDTO;
-import com.universidade.sighoras.controller.SolicitacaoResponseDTO;
-import com.universidade.sighoras.entity.Arquivo;
 import com.universidade.sighoras.entity.Solicitacao;
-import com.universidade.sighoras.entity.HoraTipo;
-import com.universidade.sighoras.repository.ArquivoRepository;
-import com.universidade.sighoras.repository.SolicitacaoRepository;
 import IntegrandoDrive.service.FileService;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
-@Transactional
 public class AlunoService {
+
+    private final SolicitacaoService solicitacaoService;
     private final FileService fileService;
-    private final SolicitacaoRepository solicitacaoRepo;
-    private final ArquivoRepository arquivoRepo;
 
-    private static final String PASTA_RAIZ_DRIVE = "1TIFxvdsCFWpB9xeXK6mx59Csp5MuDJlN";
-
-    public AlunoService(FileService fileService,
-                        SolicitacaoRepository solicitacaoRepo,
-                        ArquivoRepository arquivoRepo) {
+    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService) {
+        this.solicitacaoService = solicitacaoService;
         this.fileService = fileService;
-        this.solicitacaoRepo = solicitacaoRepo;
-        this.arquivoRepo = arquivoRepo;
     }
 
-    public SolicitacaoResponseDTO processarDocumentos(MultipartFile[] files,
-                                                     Long matricula,
-                                                     String nome,
-                                                     HoraTipo horaTipo) {
-        // usa findByMatricula (retorna só uma) em vez de método inexistente
-        Solicitacao anterior = solicitacaoRepo.findByMatricula(matricula);
-        if (anterior != null && "FINALIZADA".equals(anterior.getStatus())) {
-            throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Não é possível adicionar arquivos a submissão finalizada"
-            );
-        }
+    /**
+     * Cria uma nova solicitação de aluno.
+     */
+    public ResponseEntity<Void> criarSolicitacao(Long matricula,
+                                                 String nome,
+                                                 String email,
+                                                 String horaTipo,
+                                                 String linkPasta) {
+        // Sempre pode criar enquanto não houver pendente
+        solicitacaoService.criarSolicitacao(matricula, nome, email, horaTipo, linkPasta);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Atualiza o status de uma solicitação existente.
+     */
+    public ResponseEntity<Void> atualizarStatus(Long matricula, String status) {
+        // Permite qualquer transição registrada no service
+        solicitacaoService.atualizarStatus(matricula, status);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Adiciona um arquivo a uma solicitação existente, se permitido.
+     */
+    public void adicionarArquivo(Long idSolicitacao, MultipartFile arquivo) {
+        Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
+        verificarPermissaoModificacao(sol);
 
         try {
-            Solicitacao sol = new Solicitacao();
-            sol.setMatricula(matricula);
-            sol.setNome(nome);
-            sol.setHoraTipo(horaTipo);
-            sol.setStatus("EM_PROCESSAMENTO");
-            sol.setDataSolicitacao(LocalDateTime.now().toString());
-            // o campo "resposta" na sua entidade original não existe, 
-            // então vamos pular essa etapa
-            sol = solicitacaoRepo.save(sol);
+            // Converte MultipartFile para File temporário
+            java.io.File tempFile = java.io.File.createTempFile("upload-", arquivo.getOriginalFilename());
+            arquivo.transferTo(tempFile);
 
-            String pastaId = fileService.createFolder(nome, PASTA_RAIZ_DRIVE);
-            String pastaLink = fileService.getFolderLink(pastaId);
-            sol.setLinkPasta(pastaLink);
-            sol = solicitacaoRepo.save(sol);
-
-            for (MultipartFile mf : files) {
-                if (mf.isEmpty()) continue;
-                File temp = convertMultipartToFile(mf);
-                try {
-                    String fileId = fileService.uploadFile(temp, pastaId, sol.getStatus());
-                    String fileLink = fileService.getFileLink(fileId);
-
-                    Arquivo arq = new Arquivo();
-                    arq.setIdSolicitacao(sol.getId());
-                    arq.setNomeArquivo(mf.getOriginalFilename());
-                    arq.setDrivelink(fileLink);
-                    arq.setComentario("");
-                    arq.setData(LocalDateTime.now().toString());
-                    arquivoRepo.save(arq);
-                } finally {
-                    temp.delete();
-                }
-            }
-
-            sol.setStatus("DOCUMENTOS_ENVIADOS");
-            sol = solicitacaoRepo.save(sol);
-            return converterParaResponseDTO(sol);
-
+            fileService.uploadFile(tempFile, sol.getLinkPasta());
+            tempFile.delete(); // limpa depois
         } catch (IOException e) {
-            throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erro no Drive",
-                e
-            );
+            throw new RuntimeException("Erro ao fazer upload para o Drive", e);
         }
     }
 
-    public SolicitacaoResponseDTO buscarSolicitacao(Long id) {
-        Solicitacao sol = solicitacaoRepo.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Solicitação não encontrada ID: " + id
-            ));
-        return converterParaResponseDTO(sol);
-    }
+    /**
+     * Remove um arquivo de uma solicitação existente, se permitido.
+     */
+    public void removerArquivo(Long idSolicitacao, String linkArquivo) {
+        Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
+        verificarPermissaoModificacao(sol);
 
-    public List<SolicitacaoResponseDTO> buscarSolicitacoesPorAluno(Long matricula) {
-        // como não existe método de lista por matrícula, usamos findByMatricula e retornamos
-        Solicitacao sol = solicitacaoRepo.findByMatricula(matricula);
-        if (sol == null) {
-            return Collections.emptyList();
-        }
-        return List.of(converterParaResponseDTO(sol));
-    }
-
-    public SolicitacaoResponseDTO finalizarSubmissao(Long id, String comentario) {
         try {
-            Solicitacao sol = solicitacaoRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Solicitação não encontrada ID: " + id
-                ));
-            String pastaLink = sol.getLinkPasta(); 
-            String pastaId   = pastaLink.substring(pastaLink.lastIndexOf('/') + 1);
-            fileService.finalizeSubmission(pastaId);
-            sol.setStatus("FINALIZADA");
-            // não existe setResposta → vamos ignorar
-            sol = solicitacaoRepo.save(sol);
-            return converterParaResponseDTO(sol);
-
+            String fileId = extrairFileIdDoLink(linkArquivo);
+            fileService.deleteFile(fileId);
         } catch (IOException e) {
-            throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erro no Drive",
-                e
+            throw new RuntimeException("Erro ao remover arquivo do Drive", e);
+        }
+    }
+
+    /**
+     * Lista todas as solicitações.
+     */
+    public ResponseEntity<List<Solicitacao>> listarTodas() {
+        List<Solicitacao> lista = solicitacaoService.listarSolicitacoes();
+        return ResponseEntity.ok(lista);
+    }
+
+    /**
+     * Busca uma solicitação pelo seu ID.
+     */
+    public ResponseEntity<Solicitacao> buscarPorId(Long id) {
+        Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(id);
+        return sol != null
+                ? ResponseEntity.ok(sol)
+                : ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Lista solicitações por nome do aluno.
+     */
+    public ResponseEntity<List<Solicitacao>> listarPorNome(String nome) {
+        List<Solicitacao> lista = solicitacaoService.listarSolicitacoesPorNome(nome);
+        return ResponseEntity.ok(lista);
+    }
+    /**
+     * Recebe o link do arquivo e extrai o id dele.
+     */
+    private String extrairFileIdDoLink(String link) {
+        // Suporta links no formato: https://drive.google.com/file/d/FILE_ID/view
+        // ou: https://drive.google.com/open?id=FILE_ID
+        if (link.contains("/d/")) {
+            return link.split("/d/")[1].split("/")[0];
+        } else if (link.contains("id=")) {
+            return link.split("id=")[1].split("&")[0];
+        } else {
+            throw new IllegalArgumentException("Link do arquivo inválido: " + link);
+        }
+    }
+
+    /**
+     * Valida se o status da solicitação permite adicionar/excluir arquivos.
+     */
+    private void verificarPermissaoModificacao(Solicitacao sol) {
+        String st = sol.getStatus();
+        // Permite apenas quando Aberta ou Rejeitada
+        if (!"Aberta".equalsIgnoreCase(st) && !"Rejeitada".equalsIgnoreCase(st)) {
+            throw new IllegalStateException(
+                "Não é permitido modificar arquivos na solicitação com status: " + st
             );
         }
-    }
-
-    public String obterLinkPastaAluno(Long id) {
-        Solicitacao sol = solicitacaoRepo.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Solicitação não encontrada ID: " + id
-            ));
-        return sol.getLinkPasta();
-    }
-
-    public void excluirDocumento(Long docId) {
-        Arquivo doc = arquivoRepo.findById(docId)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Documento não encontrado ID: " + docId
-            ));
-        Solicitacao sol = solicitacaoRepo.findById(doc.getIdSolicitacao())
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Solicitação não encontrada ID: " + doc.getIdSolicitacao()
-            ));
-        if ("FINALIZADA".equals(sol.getStatus())) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Não permitido"
-            );
-        }
-        try {
-            fileService.deleteFile(doc.getDrivelink(), sol.getStatus());
-            arquivoRepo.delete(doc);
-        } catch (IOException e) {
-            throw new ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Erro ao excluir documento",
-                e
-            );
-        }
-    }
-
-    private File convertMultipartToFile(MultipartFile mf) throws IOException {
-        File file = new File(System.getProperty("java.io.tmpdir"), mf.getOriginalFilename());
-        mf.transferTo(file);
-        return file;
-    }
-
-    private SolicitacaoResponseDTO converterParaResponseDTO(Solicitacao sol) {
-        SolicitacaoResponseDTO dto = new SolicitacaoResponseDTO();
-        dto.setId(sol.getId());
-        dto.setMatricula(sol.getMatricula());
-        dto.setNome(sol.getNome());
-        dto.setHoraTipo(sol.getHoraTipo());
-        dto.setStatus(sol.getStatus());
-        dto.setDataSolicitacao(sol.getDataSolicitacao());
-        // não existe getResposta() na entidade, então omitimos
-        dto.setLinkPasta(sol.getLinkPasta());
-
-        List<DocumentoDTO> docs = new ArrayList<>();
-        List<Arquivo> arquivos = arquivoRepo.findByIdSolicitacao(sol.getId());
-        if (arquivos == null) arquivos = Collections.emptyList();
-        for (Arquivo a : arquivos) {
-            DocumentoDTO d = new DocumentoDTO();
-            d.setId(a.getId());
-            d.setNomeArquivo(a.getNomeArquivo());
-            d.setDriveUrl(a.getDrivelink());
-            d.setComentario(a.getComentario());
-            d.setData(a.getData());
-            docs.add(d);
-        }
-        dto.setArquivos(docs);
-        return dto;
     }
 }

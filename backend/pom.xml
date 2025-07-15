@@ -109,6 +109,18 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+            <!-- Exec Maven Plugin para rodar o main de teste -->
+            <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <!-- FQCN da sua classe com main() -->
+                <mainClass>com.universidade.sighoras.service.AlunoServiceTest</mainClass>
+                <!-- Incluir classes de teste e resources de teste -->
+                <classpathScope>test</classpathScope>
+            </configuration>
+            </plugin>
         </plugins>
     </build>
 

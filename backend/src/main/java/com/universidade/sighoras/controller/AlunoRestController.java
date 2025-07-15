@@ -1,89 +1,96 @@
 package com.universidade.sighoras.controller;
 
-import com.universidade.sighoras.controller.SolicitacaoResponseDTO;
-import com.universidade.sighoras.entity.HoraTipo;
+import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.service.AlunoService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.Collections;
+
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/aluno")
 @CrossOrigin(origins = "*")
 public class AlunoRestController {
+
     private final AlunoService alunoService;
 
     public AlunoRestController(AlunoService alunoService) {
         this.alunoService = alunoService;
     }
 
-    // RF2.1: Receber documentos do front
-    @PostMapping("/upload-documentos")
-    public ResponseEntity<?> uploadDocumentos(
-            @RequestParam("files") MultipartFile[] files,
-            @RequestParam("matricula") Long matricula,
-            @RequestParam("nome") String nome,
-            @RequestParam("horaTipo") HoraTipo horaTipo) {
-        try {
-            SolicitacaoResponseDTO dto = alunoService.processarDocumentos(files, matricula, nome, horaTipo);
-            return ResponseEntity.ok(dto);
-        } catch (IllegalStateException e) {
-            // submissão finalizada
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", e.getMessage()));
-        }
+    /**
+     * RF1.1 Criar nova solicitação
+     */
+    @PostMapping("/solicitacao")
+    public ResponseEntity<Void> criarSolicitacao(
+            @RequestParam Long matricula,
+            @RequestParam String nome,
+            @RequestParam String email,
+            @RequestParam String horaTipo,
+            @RequestParam String linkPasta
+    ) {
+        return alunoService.criarSolicitacao(matricula, nome, email, horaTipo, linkPasta);
     }
 
-    // RF2.3: Enviar dados da solicitação para o front
+    /**
+     * RF1.2 Atualizar status da solicitação
+     */
+    @PutMapping("/solicitacao/{matricula}/status")
+    public ResponseEntity<Void> atualizarStatus(
+            @PathVariable Long matricula,
+            @RequestParam String status
+    ) {
+        return alunoService.atualizarStatus(matricula, status);
+    }
+
+    /**
+     * RF2.1 Adicionar arquivo (chama AlunoService.verificarPermissaoModificacao)
+     */
+    @PostMapping("/solicitacao/{id}/arquivo")
+    public ResponseEntity<Void> adicionarArquivo(@PathVariable Long idSolicitacao,
+                                                @RequestParam("arquivo") MultipartFile arquivo) {
+        alunoService.adicionarArquivo(idSolicitacao, arquivo);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * RF2.2 Remover arquivo (chama AlunoService.verificarPermissaoModificacao)
+     */
+    @DeleteMapping("/solicitacao/{id}/arquivo")
+    public ResponseEntity<Void> removerArquivo(
+            @PathVariable("id") Long idSolicitacao,
+            @RequestParam("link") String linkArquivo
+    ) {
+        alunoService.removerArquivo(idSolicitacao, linkArquivo);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * RF3.1 Listar todas as solicitações
+     */
+    @GetMapping("/solicitacoes")
+    public ResponseEntity<List<Solicitacao>> listarTodas() {
+        return alunoService.listarTodas();
+    }
+
+    /**
+     * RF3.2 Buscar solicitação por ID
+     */
     @GetMapping("/solicitacao/{id}")
-    public ResponseEntity<?> buscarSolicitacao(@PathVariable Long id) {
-        try {
-            SolicitacaoResponseDTO response = alunoService.buscarSolicitacao(id);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", e.getMessage()));
-        }
+    public ResponseEntity<Solicitacao> buscarPorId(
+            @PathVariable Long id
+    ) {
+        return alunoService.buscarPorId(id);
     }
 
-    @GetMapping("/solicitacoes/aluno/{matricula}")
-    public ResponseEntity<List<SolicitacaoResponseDTO>> buscarSolicitacoesPorAluno(
-            @PathVariable Long matricula) {
-        List<SolicitacaoResponseDTO> lista = alunoService.buscarSolicitacoesPorAluno(matricula);
-        return ResponseEntity.ok(lista);
-    }
-
-    @PostMapping("/finalizar-submissao/{id}")
-    public ResponseEntity<?> finalizarSubmissao(
-            @PathVariable Long id,
-            @RequestParam(required = false) String comentario) {
-        try {
-            SolicitacaoResponseDTO response = alunoService.finalizarSubmissao(id, comentario);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", e.getMessage()));
-        }
-    }
-
-    @GetMapping("/pasta-link/{id}")
-    public ResponseEntity<String> obterLinkPasta(@PathVariable Long id) {
-        String link = alunoService.obterLinkPastaAluno(id);
-        return ResponseEntity.ok(link);
-    }
-
-    @DeleteMapping("/documento/{id}")
-    public ResponseEntity<?> excluirDocumento(@PathVariable Long id) {
-        try {
-            alunoService.excluirDocumento(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", e.getMessage()));
-        }
+    /**
+     * RF3.3 Listar solicitações por nome do aluno
+     */
+    @GetMapping("/solicitacoes/por-nome")
+    public ResponseEntity<List<Solicitacao>> listarPorNome(
+            @RequestParam String nome
+    ) {
+        return alunoService.listarPorNome(nome);
     }
 }
