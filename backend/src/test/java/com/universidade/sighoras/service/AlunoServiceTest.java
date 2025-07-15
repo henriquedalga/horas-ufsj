@@ -72,7 +72,7 @@ public class AlunoServiceTest {
 
             File tmp = new File("teste.pdf");
             Files.writeString(tmp.toPath(), "Testando");
-            var mp = new org.springframework.mock.web.MockMultipartFile(
+            org.springframework.mock.web.MockMultipartFile mp = new org.springframework.mock.web.MockMultipartFile(
                 "file", "teste.pdf", "aplication/pdf", Files.readAllBytes(tmp.toPath()));
             alunoService.adicionarArquivo(sol3.getId(), mp);
             List<String> links = fileService.listFileLinks(pasta3);
