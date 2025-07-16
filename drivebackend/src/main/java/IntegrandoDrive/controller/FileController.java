@@ -26,12 +26,13 @@ public class FileController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
         @RequestParam MultipartFile file,
-        @RequestParam String folderId
+        @RequestParam String folderId,
+        @RequestParam int hourtype // 0=complementar, 1=extensao
     ) throws IOException {
         File temp = new File(TMP_DIR, file.getOriginalFilename());
         file.transferTo(temp);
         try {
-            String fileId = fileService.uploadFile(temp, folderId);
+            String fileId = fileService.uploadFile(temp, folderId, hourtype);
             return ResponseEntity.ok(fileId);
         } catch (IllegalStateException ex) {
             return ResponseEntity
@@ -48,10 +49,11 @@ public class FileController {
     @DeleteMapping("/{fileId}")
     public ResponseEntity<Void> deleteFile(
         @PathVariable String fileId,
-        @RequestParam String status
+        @RequestParam String status,
+        @RequestParam int hourType  // 0=compl, 1=ext
     ) throws IOException {
         try {
-            fileService.deleteFile(fileId);
+            fileService.deleteFile(fileId, hourType);
             return ResponseEntity.noContent().build();
         } catch (IllegalStateException ex) {
             return ResponseEntity
@@ -63,28 +65,36 @@ public class FileController {
     /** Marca todos os arquivos como read‑only (finaliza submissão). */
     @PostMapping("/finalize")
     public ResponseEntity<Void> finalizeSubmission(
-        @RequestParam String folderId
+        @RequestParam String folderId,
+        @RequestParam int hourType  // 0=compl, 1=ext
     ) throws IOException {
-        fileService.finalizeSubmission(folderId);
+        fileService.finalizeSubmission(folderId, hourType);
         return ResponseEntity.noContent().build();
     }
 
     /** Rejeita submissão (torna todos os arquivos editáveis de novo). */
     @PostMapping("/reject")
     public ResponseEntity<Void> rejectSubmission(
-        @RequestParam String folderId
+        @RequestParam String folderId,
+        @RequestParam int hourType  // 0=compl, 1=ext
     ) throws IOException {
-        fileService.rejectSubmission(folderId);
+        fileService.rejectSubmission(folderId, hourType);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/folder/{folderId}/link")
-    public ResponseEntity<String> getFolderLink(@PathVariable String folderId) throws IOException {
-        return ResponseEntity.ok(fileService.getFolderLink(folderId));
+    public ResponseEntity<String> getFolderLink(
+        @PathVariable String folderId,
+        @RequestParam int hourType  // 0=compl, 1=ext
+        ) throws IOException {
+        return ResponseEntity.ok(fileService.getFolderLink(folderId, hourType));
     }
 
     @GetMapping("/file/{fileId}/link")
-    public ResponseEntity<String> getFileLink(@PathVariable String fileId) throws IOException {
-        return ResponseEntity.ok(fileService.getFileLink(fileId));
+    public ResponseEntity<String> getFileLink(
+        @PathVariable String fileId,
+        @RequestParam int hourType  // 0=compl, 1=ext
+        ) throws IOException {
+        return ResponseEntity.ok(fileService.getFileLink(fileId, hourType));
     }
 }

@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+credentials-complementary.json
+credentials-extension.json

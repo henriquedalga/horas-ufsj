@@ -20,7 +20,7 @@ public class AlunoRestController {
     }
 
     /**
-     * RF1.1 Criar nova solicitação
+     * Criar nova solicitação
      */
     @PostMapping("/solicitacao")
     public ResponseEntity<Void> criarSolicitacao(
@@ -34,7 +34,7 @@ public class AlunoRestController {
     }
 
     /**
-     * RF1.2 Atualizar status da solicitação
+     * Atualizar status da solicitação
      */
     @PutMapping("/solicitacao/{matricula}/status")
     public ResponseEntity<Void> atualizarStatus(
@@ -45,7 +45,7 @@ public class AlunoRestController {
     }
 
     /**
-     * RF2.1 Adicionar arquivo (chama AlunoService.verificarPermissaoModificacao)
+     * Adicionar arquivo (chama AlunoService.verificarPermissaoModificacao)
      */
     @PostMapping("/solicitacao/{id}/arquivo")
     public ResponseEntity<Void> adicionarArquivo(@PathVariable Long idSolicitacao,
@@ -55,7 +55,7 @@ public class AlunoRestController {
     }
 
     /**
-     * RF2.2 Remover arquivo (chama AlunoService.verificarPermissaoModificacao)
+     * Remover arquivo (chama AlunoService.verificarPermissaoModificacao)
      */
     @DeleteMapping("/solicitacao/{id}/arquivo")
     public ResponseEntity<Void> removerArquivo(
@@ -67,7 +67,18 @@ public class AlunoRestController {
     }
 
     /**
-     * RF3.1 Listar todas as solicitações
+     * Finalizar submissão de solicitação: 
+     * marca pasta como read‑only, envia e‑mail e atualiza status
+     */
+    @PostMapping("/solicitacao/{id}/finalizar")
+    public ResponseEntity<Void> finalizarSolicitacao(
+            @PathVariable("id") Long idSolicitacao
+    ) {
+        return alunoService.finalizarSolicitacao(idSolicitacao);
+    }
+
+    /**
+     * Listar todas as solicitações
      */
     @GetMapping("/solicitacoes")
     public ResponseEntity<List<Solicitacao>> listarTodas() {
@@ -75,7 +86,7 @@ public class AlunoRestController {
     }
 
     /**
-     * RF3.2 Buscar solicitação por ID
+     * Buscar solicitação por ID
      */
     @GetMapping("/solicitacao/{id}")
     public ResponseEntity<Solicitacao> buscarPorId(
@@ -85,12 +96,21 @@ public class AlunoRestController {
     }
 
     /**
-     * RF3.3 Listar solicitações por nome do aluno
+     * Listar solicitações por nome do aluno
      */
     @GetMapping("/solicitacoes/por-nome")
     public ResponseEntity<List<Solicitacao>> listarPorNome(
             @RequestParam String nome
     ) {
         return alunoService.listarPorNome(nome);
+    }
+    /**
+     * Lista todos os arquivos de uma solicitação
+     */
+    @GetMapping("/solicitacao/{id}/arquivos")
+    public ResponseEntity<List<String>> listarArquivos(
+            @PathVariable("id") Long idSolicitacao
+    ) {
+        return alunoService.listarArquivos(idSolicitacao);
     }
 }

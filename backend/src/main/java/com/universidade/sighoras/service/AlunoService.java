@@ -1,6 +1,8 @@
 package com.universidade.sighoras.service;
 
+import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Solicitacao;
+import com.universidade.sighoras.service.EmailService;
 import IntegrandoDrive.service.FileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,12 @@ public class AlunoService {
 
     private final SolicitacaoService solicitacaoService;
     private final FileService fileService;
+    private final EmailService emailService;
 
-    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService) {
+    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService, EmailService emailService) {
         this.solicitacaoService = solicitacaoService;
         this.fileService = fileService;
+        this.emailService = emailService;
     }
 
     /**
@@ -41,6 +45,26 @@ public class AlunoService {
         solicitacaoService.atualizarStatus(matricula, status);
         return ResponseEntity.ok().build();
     }
+    /**
+     * Finaliza a submissão: marca pasta como read‑only, envia e‑mail e atualiza status.
+     */
+    public ResponseEntity<Void> finalizarSolicitacao(Long idSolicitacao) {
+        Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
+        verificarPermissaoModificacao(sol);
+
+        int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
+        try {
+            fileService.finalizeSubmission(sol.getLinkPasta(), hourType);
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao finalizar submissão no Drive", e);
+        }
+
+        emailService.sendSubmissionEmail(sol);
+
+        solicitacaoService.atualizarStatus(sol.getMatricula(), "Pendente");
+
+        return ResponseEntity.ok().build();
+    }    
 
     /**
      * Adiciona um arquivo a uma solicitação existente, se permitido.
@@ -53,8 +77,8 @@ public class AlunoService {
             // Converte MultipartFile para File temporário
             java.io.File tempFile = java.io.File.createTempFile("upload-", arquivo.getOriginalFilename());
             arquivo.transferTo(tempFile);
-
-            fileService.uploadFile(tempFile, sol.getLinkPasta());
+            int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
+            fileService.uploadFile(tempFile, sol.getLinkPasta(), hourType);
             tempFile.delete(); // limpa depois
         } catch (IOException e) {
             throw new RuntimeException("Erro ao fazer upload para o Drive", e);
@@ -70,7 +94,8 @@ public class AlunoService {
 
         try {
             String fileId = extrairFileIdDoLink(linkArquivo);
-            fileService.deleteFile(fileId);
+            int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
+            fileService.deleteFile(fileId, hourType);
         } catch (IOException e) {
             throw new RuntimeException("Erro ao remover arquivo do Drive", e);
         }
@@ -101,6 +126,21 @@ public class AlunoService {
         List<Solicitacao> lista = solicitacaoService.listarSolicitacoesPorNome(nome);
         return ResponseEntity.ok(lista);
     }
+
+    /**
+     * Lista todos os arquivos de uma solicitação.
+     */
+    public ResponseEntity<List<String>> listarArquivos(Long idSolicitacao) {
+        Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
+        int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
+        try {
+            List<String> links = fileService.listFileLinks(sol.getLinkPasta(), hourType);
+            return ResponseEntity.ok(links);
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao listar arquivos do Drive", e);
+        }
+    }
+
     /**
      * Recebe o link do arquivo e extrai o id dele.
      */
