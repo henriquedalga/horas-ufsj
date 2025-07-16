@@ -20,7 +20,7 @@ const FAKE_AUTH_TOKEN = "Bearer fake-super-secret-admin-token-12345";
 const createRandomHoras = () => ({
   id: faker.number.int({ min: 1, max: 10000 }),
   nome: faker.person.fullName(),
-  status: faker.helpers.arrayElement(["PENDENTE", "APROVADO", "REPROVADO"]),
+  status: faker.helpers.arrayElement(["ABERTO", "FECHADO"]),
 });
 
 const createRandomAdmin = () => ({
@@ -30,6 +30,90 @@ const createRandomAdmin = () => ({
   role: faker.helpers.arrayElement(["admin", "mod"]),
 });
 
+// Gerador para um único arquivo. Agora ele pode receber um status específico.
+const createFakeFile = (statusDefinido) => {
+  // Se um status for passado, usa ele. Senão, escolhe aleatoriamente.
+  const status =
+    statusDefinido ||
+    faker.helpers.arrayElement(["APROVADO", "REPROVADO", "PENDENTE"]);
+  let feedback = null;
+
+  if (status === "REPROVADO") {
+    feedback = faker.lorem.sentence();
+  }
+
+  return {
+    id: `arq-${faker.string.alphanumeric(10)}`,
+    nome: faker.system.commonFileName("pdf"),
+    status: status,
+    feedback: feedback,
+    // ... outros dados do arquivo
+  };
+};
+
+// GERADOR PRINCIPAL: Agora ele constrói a resposta com base nas suas regras de negócio.
+const createFakeActivityResponse = (id, tipo, statusPedidoDesejado) => {
+  let arquivos = [];
+
+  switch (statusPedidoDesejado) {
+    case "FECHADO":
+      // Regra: Todos os arquivos devem estar APROVADOS.
+      arquivos = faker.helpers.multiple(() => createFakeFile("APROVADO"), {
+        count: { min: 1, max: 3 },
+      });
+      break;
+
+    case "ABERTO": {
+      // Regra: Ou não tem arquivos, ou tem pelo menos um REPROVADO.
+      // Vamos sortear um dos dois cenários.
+      const comArquivosReprovados = faker.datatype.boolean();
+      if (comArquivosReprovados) {
+        arquivos.push(createFakeFile("REPROVADO")); // Garante pelo menos um reprovado
+        arquivos.push(createFakeFile("APROVADO"));
+        arquivos.push(createFakeFile("PENDENTE"));
+      }
+      // Se não, o array 'arquivos' fica vazio, o que também significa ABERTO.
+      break;
+    }
+  }
+
+  return {
+    id: id,
+    tipo: tipo,
+    statusPedido: statusPedidoDesejado,
+    arquivos: arquivos,
+    // ... outros dados como aluno e dataEnvio
+  };
+};
+
+const handleSolicitacaoAluno = ({ request, params }) => {
+  // 1. A única verificação é a existência do token
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader) {
+    return HttpResponse.json(
+      { message: "Token não fornecido." },
+      { status: 401 }
+    );
+  }
+
+  // 2. SORTEIA ALEATORIAMENTE um dos três status de pedido possíveis
+  const statusPossiveis = ["FECHADO", "ABERTO"];
+  const statusSorteado = faker.helpers.arrayElement(statusPossiveis);
+
+  console.log(
+    `[MSW] Token verificado. Gerando uma resposta aleatória com status: ${statusSorteado}`
+  );
+
+  // 3. Usa o gerador para criar uma resposta COMPLETA e CONSISTENTE com o status sorteado
+  // O 'params.tipo' virá da rota que foi chamada ('extensao' ou 'complementar')
+  const responseData = createFakeActivityResponse(
+    faker.string.uuid(), // Gera um ID de atividade aleatório
+    params.tipo,
+    statusSorteado
+  );
+
+  return HttpResponse.json(responseData);
+};
 // --- 3. Definição dos Handlers da API ---
 
 /** Handler compartilhado para as rotas /admin e /mod */
@@ -121,4 +205,12 @@ export const handlers = [
 
     return HttpResponse.json({ message: "UUID inválido" }, { status: 400 });
   }),
+
+  // As duas rotas agora usam a mesma função de handler dinâmico
+  http.get(`${API_URL}/aluno/solicitacao/extensao`, handleSolicitacaoAluno),
+  http.get(`${API_URL}/aluno/solicitacao/complementar`, handleSolicitacaoAluno),
+
+  // Adicionamos um :tipo na rota para que o handler saiba qual tipo de atividade gerar
+  // Esta é uma forma mais limpa de reutilizar a lógica
+  http.get(`${API_URL}/aluno/solicitacao/:tipo`, handleSolicitacaoAluno),
 ];
