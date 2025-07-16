@@ -3,7 +3,10 @@ package com.universidade.sighoras;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "com.universidade.sighoras")
+@SpringBootApplication(scanBasePackages = {
+	"com.universidade.sighoras",
+	"IntegrandoDrive"
+})
 public class HorasUfsjApplication {
 
 	public static void main(String[] args) {

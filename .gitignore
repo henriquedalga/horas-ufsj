@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Ignorar build artifacts
+/backend/target/
+/drivebackend/target/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
