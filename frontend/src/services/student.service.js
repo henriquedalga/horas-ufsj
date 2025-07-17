@@ -33,6 +33,15 @@ class StudentService {
       },
     });
   }
+
+  getSolicitacaoExtensao() {
+    // O wrapper 'api.js' adiciona o token de autorização automaticamente
+    return api("/aluno/solicitacao/extensao");
+  }
+
+  getSolicitacaoComplementar() {
+    return api("/aluno/solicitacao/complementar");
+  }
 }
 
 export default new StudentService();
