@@ -49,9 +49,9 @@ public class SolicitacaoService {
         solicitacao.setHoraTipo(horaTipo);
         solicitacao.setStatus("Aberta"); // Status inicial
         solicitacao.setDataSolicitacao(new java.util.Date().toString()); // Data atual como string
-
-        String folderId = fileService.createFolder(matricula.toString(), "root");
-        solicitacao.setLinkPasta(fileService.getFolderLink(folderId));
+         int hourTypeInt = (horaTipo == HoraTipo.EXTENSAO) ? 1 : 0;
+        String folderId = fileService.createFolder(matricula.toString(), hourTypeInt);
+        solicitacao.setLinkPasta(fileService.getFolderLink(folderId, hourTypeInt));
         
         // Salva e retorna a nova solicitação
         return solicitacaoRepository.save(solicitacao);

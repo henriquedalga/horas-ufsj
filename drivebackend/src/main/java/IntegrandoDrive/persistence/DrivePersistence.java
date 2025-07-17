@@ -22,15 +22,41 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Objects;
 
-@Component
 public class DrivePersistence {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String APPLICATION_NAME = "Drive Submission App";
 
     private final Drive driveService;
+    private String defaultParentFolderId;
 
-    public DrivePersistence(Drive driveService) {
+    public DrivePersistence(Drive driveService, String defaultParentFolderId) {
         this.driveService = driveService;
+        this.defaultParentFolderId = defaultParentFolderId;
+    }
+    /**
+     * Inicializa o DriveService a partir de um arquivo JSON de credenciais.
+     */   
+    public static Drive initDriveService(String credentialsPath)
+            throws IOException, GeneralSecurityException {
+        InputStream in = DrivePersistence.class.getResourceAsStream(credentialsPath);
+        GoogleCredentials creds = GoogleCredentials.fromStream(in)
+            .createScoped(Collections.singletonList("https://www.googleapis.com/auth/drive"));
+
+        HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+        return new Drive.Builder(transport, JSON_FACTORY, new HttpCredentialsAdapter(creds))
+            .setApplicationName(APPLICATION_NAME)
+            .build();
+    }
+
+    /**
+     * Define ou atualiza a pasta pai padrão para operações.
+     */
+    public void setDefaultParentFolderId(String defaultParentFolderId) {
+        this.defaultParentFolderId = defaultParentFolderId;
+    }
+
+    public String getDefaultParentFolderId() {
+        return defaultParentFolderId;
     }
 
     public String createFolderIfNotExists(String folderName, String parentFolderId) throws IOException {

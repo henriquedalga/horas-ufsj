@@ -1,6 +1,8 @@
 package IntegrandoDrive.service;
 
 import IntegrandoDrive.persistence.DrivePersistence;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -9,63 +11,104 @@ import java.util.List;
 @Service
 public class FileService {
 
-    private final DrivePersistence persistence;
+    private final DrivePersistence persComp;
+    private final DrivePersistence persExt;
 
-    public FileService(DrivePersistence persistence) {
-        this.persistence = persistence;
+    public FileService(
+        @Qualifier("persistenceComplementary") DrivePersistence persComp,
+        @Qualifier("persistenceExtension")     DrivePersistence persExt
+    ) {
+        this.persComp = persComp;
+        this.persExt  = persExt;
+    }
+    private DrivePersistence selectPersistence(int hourType) {
+        // 0 = complementar, 1 = extensão
+        return hourType == 1 ? persExt : persComp;
     }
 
     /**
      * Cria uma pasta no Drive, se não existir.
      */
-    public String createFolder(String nome, String parentFolderId) throws IOException {
-        return persistence.createFolderIfNotExists(nome, parentFolderId);
+    public String createFolder(String nome, String parentFolderId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .createFolderIfNotExists(nome, parentFolderId);
+    }
+
+     /**
+     * Cria uma pasta no Drive, se não existir.
+     */
+    public String createFolder(String nome, int hourType) throws IOException {
+        DrivePersistence persistence = selectPersistence(hourType);
+        return persistence.createFolderIfNotExists(nome, persistence.getDefaultParentFolderId());
     }
 
     /**
      * Faz upload de arquivo, desde que a solicitação não esteja finalizada.
      */
-    public String uploadFile(java.io.File localFile, String folderId) throws IOException {
-        return persistence.uploadFile(localFile, folderId);
+    public String uploadFile(java.io.File localFile, String folderId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .uploadFile(localFile, folderId);
     }
 
     /**
      * Exclui arquivo, desde que a solicitação não esteja finalizada.
      */
-    public void deleteFile(String fileId) throws IOException {
-        persistence.deleteFile(fileId);
+    public void deleteFile(String fileId, int hourType) throws IOException {
+        selectPersistence(hourType)
+            .deleteFile(fileId);
     }
 
     /**
      * Finaliza submissão: marca todos os arquivos como read-only.
      */
-    public void finalizeSubmission(String folderId) throws IOException {
-        persistence.setFolderReadOnly(folderId);
+    public void finalizeSubmission(String folderId, int hourType) throws IOException {
+        selectPersistence(hourType)
+            .setFolderReadOnly(folderId);
     }
 
-    public void rejectSubmission(String folderId) throws IOException {
-        persistence.setFolderWritable(folderId);
-    }
-
-    public String getFolderLink(String folderId) throws IOException {
-        return persistence.getFolderLink(folderId);
-    }
-
-    public String getFileLink(String fileId) throws IOException {
-        return persistence.getFileLink(fileId);
-    }
-    public boolean isFolderReadOnly(String folderId) throws IOException {
-        return persistence.isFolderReadOnly(folderId);
-    }
-
-    public List<String> listFileLinks(String folderId) throws IOException {
-        return persistence.listFileLinks(folderId);
-    }
-        /**
-     * Cria backup do banco de dados e faz upload para a pasta.
+    /**
+     * Rejeita submissão: torna todos os arquivos editáveis de novo.
      */
-    public String backupDatabase(java.io.File dumpFile, String folderId) throws IOException {
-        // Faz upload do dump para a pasta, servindo como backup
-        return persistence.uploadFile(dumpFile, folderId);
+    public void rejectSubmission(String folderId, int hourType) throws IOException {
+        selectPersistence(hourType)
+            .setFolderWritable(folderId);
+    }
+
+    /**
+     * Retorna o link de visualização da pasta.
+     */
+    public String getFolderLink(String folderId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .getFolderLink(folderId);
+    }
+
+    /**
+     * Retorna o link de visualização do arquivo.
+     */
+    public String getFileLink(String fileId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .getFileLink(fileId);
+    }
+    /**
+     * Verifica se a pasta está marcada como somente leitura.
+     */
+    public boolean isFolderReadOnly(String folderId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .isFolderReadOnly(folderId);
+    }
+
+    /**
+     * Lista todos os links de arquivos dentro de uma pasta.
+     */
+    public List<String> listFileLinks(String folderId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .listFileLinks(folderId);
+    }
+    /**
+     * Faz backup do banco de dados e faz upload para a pasta.
+     */
+    public String backupDatabase(java.io.File dumpFile, String folderId, int hourType) throws IOException {
+        return selectPersistence(hourType)
+               .uploadFile(dumpFile, folderId);
     }
 }
