@@ -7,6 +7,13 @@ class StudentService {
     });
   }
 
+  async postSolicitacoesExtensao({ matricula, nome }) {
+    return await api(`/solicitacoes/extensao`, {
+      method: "POST",
+      params: { matricula, nome, tipo: "EXTENSAO" },
+    });
+  }
+
   async postFilesExtensao(fileData) {
     return await api(`/extensao/files`, {
       method: "POST",

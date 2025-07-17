@@ -3,6 +3,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Solicitacao;
 
 public interface SolicitacaoRepository  extends JpaRepository<Solicitacao, Long> {
@@ -11,8 +12,10 @@ public interface SolicitacaoRepository  extends JpaRepository<Solicitacao, Long>
 
     Solicitacao findByMatricula(Long matricula);
 
-    Solicitacao findByMatriculaAndHoraTipo(Long matricula, String tipoHora);
+    Solicitacao findByMatriculaAndHoraTipo(Long matricula, HoraTipo tipoHora);
 
     List<Solicitacao> findByNome(String nome);
+
+    List<Solicitacao> findByHoraTipo(HoraTipo horaTipo);
     
 }

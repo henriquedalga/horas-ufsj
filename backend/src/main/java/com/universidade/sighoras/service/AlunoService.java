@@ -1,5 +1,7 @@
 package com.universidade.sighoras.service;
 
+import com.universidade.sighoras.entity.Arquivo;
+import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Solicitacao;
 import IntegrandoDrive.service.FileService;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +16,12 @@ public class AlunoService {
 
     private final SolicitacaoService solicitacaoService;
     private final FileService fileService;
+    private final com.universidade.sighoras.repository.SolicitacaoRepository solicitacaoRepository;
 
-    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService) {
+    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService, com.universidade.sighoras.repository.SolicitacaoRepository solicitacaoRepository) {
         this.solicitacaoService = solicitacaoService;
         this.fileService = fileService;
+        this.solicitacaoRepository = solicitacaoRepository;
     }
 
     /**
@@ -25,14 +29,31 @@ public class AlunoService {
      */
     public ResponseEntity<Void> criarSolicitacao(Long matricula,
                                                  String nome,
-                                                 String email,
-                                                 String horaTipo,
-                                                 String linkPasta) {
+                                                 String horaTipo) {
         // Sempre pode criar enquanto não houver pendente
-        solicitacaoService.criarSolicitacao(matricula, nome, email, horaTipo, linkPasta);
+        HoraTipo tipo = HoraTipo.valueOf(horaTipo.toUpperCase());
+        try {
+            solicitacaoService.criarSolicitacao(matricula, nome, tipo);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Verifica se uma solicitação existe, se não, cria uma nova.
+     * @return A solicitação existente ou recém-criada
+     */
+    public Solicitacao verificarOuCriarSolicitacao(Long matricula, String nome, HoraTipo horaTipo) {
+        try {
+            return solicitacaoService.criarSolicitacao(matricula, nome, horaTipo);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
     /**
      * Atualiza o status de uma solicitação existente.
      */
@@ -48,17 +69,24 @@ public class AlunoService {
     public void adicionarArquivo(Long idSolicitacao, MultipartFile arquivo) {
         Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
         verificarPermissaoModificacao(sol);
-
+        String driveUrl = null;
+        String fileId = null;  
         try {
             // Converte MultipartFile para File temporário
             java.io.File tempFile = java.io.File.createTempFile("upload-", arquivo.getOriginalFilename());
             arquivo.transferTo(tempFile);
-
-            fileService.uploadFile(tempFile, sol.getLinkPasta());
+            
+            // Faz upload e captura o ID do arquivo retornado
+            fileId = fileService.uploadFile(tempFile, sol.getLinkPasta());
+            // Obtém o link do arquivo usando o ID
+            driveUrl = fileService.getFileLink(fileId);
             tempFile.delete(); // limpa depois
         } catch (IOException e) {
             throw new RuntimeException("Erro ao fazer upload para o Drive", e);
         }
+        Arquivo arquivoObj = new Arquivo(arquivo.getOriginalFilename(), idSolicitacao, arquivo.getSize(), driveUrl);
+        sol.adicionarArquivo(arquivoObj);
+        solicitacaoRepository.save(sol); // Salva a solicitação atualizada
     }
 
     /**
@@ -69,10 +97,36 @@ public class AlunoService {
         verificarPermissaoModificacao(sol);
 
         try {
+            // Extrair o ID do arquivo a partir do link
             String fileId = extrairFileIdDoLink(linkArquivo);
+            
+            // Remover o arquivo do Google Drive
             fileService.deleteFile(fileId);
+            
+            // Encontrar e remover o arquivo da lista de documentos da solicitação
+            Arquivo arquivoParaRemover = null;
+            for (Arquivo doc : sol.getDocumentos()) {
+                if (doc.getUrl() != null && doc.getUrl().equals(linkArquivo)) {
+                    arquivoParaRemover = doc;
+                    break;
+                }
+            }
+            
+            // Se encontrou o arquivo, remove-o da lista
+            if (arquivoParaRemover != null) {
+                sol.getDocumentos().remove(arquivoParaRemover);
+                System.out.println("Arquivo removido da solicitação: " + arquivoParaRemover.getNomeArquivo());
+            } else {
+                System.out.println("Aviso: Arquivo com link " + linkArquivo + " não encontrado na solicitação " + idSolicitacao);
+            }
+            
+            // Salva a solicitação atualizada
+            solicitacaoRepository.save(sol);
+            
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao remover arquivo do Drive", e);
+            throw new RuntimeException("Erro ao remover arquivo do Drive: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao processar remoção do arquivo: " + e.getMessage(), e);
         }
     }
 
@@ -128,4 +182,6 @@ public class AlunoService {
             );
         }
     }
+
+
 }

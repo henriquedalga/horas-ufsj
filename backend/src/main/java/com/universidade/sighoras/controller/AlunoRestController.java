@@ -1,5 +1,6 @@
 package com.universidade.sighoras.controller;
 
+import com.universidade.sighoras.dto.SolicitacaoRequestDTO;
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.service.AlunoService;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/aluno")
-@CrossOrigin(origins = "*")
 public class AlunoRestController {
 
     private final AlunoService alunoService;
@@ -22,16 +21,16 @@ public class AlunoRestController {
     /**
      * RF1.1 Criar nova solicitação
      */
-    @PostMapping("/solicitacao")
-    public ResponseEntity<Void> criarSolicitacao(
-            @RequestParam Long matricula,
-            @RequestParam String nome,
-            @RequestParam String email,
-            @RequestParam String horaTipo,
-            @RequestParam String linkPasta
-    ) {
-        return alunoService.criarSolicitacao(matricula, nome, email, horaTipo, linkPasta);
-    }
+    @PostMapping("/aluno/solicitacao/extensao")
+    public ResponseEntity<Solicitacao> verificarSolicitacao(@RequestBody SolicitacaoRequestDTO solicitacaoDTO) {
+    // Chama o serviço para criar a solicitação
+    Solicitacao sol = alunoService.verificarOuCriarSolicitacao(
+            solicitacaoDTO.getMatricula(), 
+            solicitacaoDTO.getNome(), 
+            solicitacaoDTO.getHoraTipo()
+    );
+    return ResponseEntity.ok(sol);
+}
 
     /**
      * RF1.2 Atualizar status da solicitação
@@ -92,5 +91,29 @@ public class AlunoRestController {
             @RequestParam String nome
     ) {
         return alunoService.listarPorNome(nome);
+    }
+
+
+    /////////
+    /// Métodos de testes para utilizar no postman 
+    //////// 
+    
+    @PostMapping("/solicitacao/add/arquivo/{idSolicitacao}") 
+    public ResponseEntity<Void> adicionarArquivoPost(@PathVariable("idSolicitacao")  Long idSolicitacao,
+                                                @RequestParam("arquivo") MultipartFile arquivo) {
+        System.out.println("==================================");
+        System.out.println("Recebendo requisição para adicionar arquivo");
+        System.out.println("ID da Solicitação: " + idSolicitacao);
+        System.out.println("Nome do arquivo: " + (arquivo != null ? arquivo.getOriginalFilename() : "null"));
+        System.out.println("Tamanho do arquivo: " + (arquivo != null ? arquivo.getSize() + " bytes" : "null"));
+        System.out.println("==================================");
+         try {
+         alunoService.adicionarArquivo(idSolicitacao, arquivo);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.println("Erro ao processar arquivo: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
 }

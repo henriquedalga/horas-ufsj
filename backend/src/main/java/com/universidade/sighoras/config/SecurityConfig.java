@@ -25,20 +25,29 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+                configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);
                 return configuration;
             }))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Importante para requisições preflight!
-                .requestMatchers("/check").permitAll()
-                .requestMatchers("/auth/signin-student").permitAll()
-                .requestMatchers("/auth/signin-admin").permitAll()
-                .requestMatchers( "/cadastrar/funcionario").permitAll()
-                .anyRequest().authenticated()
-            )
+            .anyRequest().permitAll() // <--- PERMITINDO TODAS AS ROTAS TEMPORARIAMENTE
+        )
+            // .authorizeHttpRequests(authorize -> authorize
+            //     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Importante para requisições preflight!
+            //     .requestMatchers("/check").permitAll()
+            //     .requestMatchers("/auth/signin-student").permitAll()
+            //     .requestMatchers("/auth/signin-admin").permitAll()
+            //     .requestMatchers( "/cadastrar/funcionario").permitAll()
+            //     .requestMatchers("/aluno/**").permitAll()
+            //     .requestMatchers("/auth/aluno/**").permitAll()
+            //     .requestMatchers("/solicitacao/add/**").permitAll()
+            //     .requestMatchers(HttpMethod.POST, "/solicitacao/add/arquivo/**").permitAll()
+
+            //    // .requestMatchers("/aluno/solicitacao/extensao").permitAll()
+            //     .anyRequest().authenticated()
+            // )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             );

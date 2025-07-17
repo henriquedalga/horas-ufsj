@@ -3,9 +3,12 @@ import storageService from "./storage.service";
 
 class AuthService {
   async login(email, password) {
-    const data = await api("/auth/signin", {
+    const data = await api("/auth/signin-admin", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ 
+      email: email, 
+      senha: password // Alterado para "senha" para combinar com o backend
+    }),
     });
 
     const { token, ...userData } = data;
