@@ -34,10 +34,9 @@ public class AlunoServiceTest {
             System.out.println("=== TESTE 1: criarSolicitacao ===");
             Long matricula1 = 777L;
             String nome1 = "Aluno1";
-            String email1 = "aluno1@uni.br";
             String tipo1 = "EXTENSAO";
-            String pasta1 = fileService.createFolder(nome1, TEST_PARENT_ID);
-            alunoService.criarSolicitacao(matricula1, nome1, email1, tipo1, pasta1);
+            //String pasta1 = fileService.createFolder(nome1, TEST_PARENT_ID);
+            alunoService.criarSolicitacao(matricula1, nome1, tipo1);
 
             List<Solicitacao> achadas1 = solicitacaoService.listarSolicitacoesPorNome(nome1);
             if (achadas1.isEmpty()) {
@@ -46,9 +45,9 @@ public class AlunoServiceTest {
                 Solicitacao sol1 = solicitacaoService.obterSolicitacaoPorId(achadas1.get(0).getId());
                 assertEquals(matricula1, sol1.getMatricula(), "matricula");
                 assertEquals(nome1, sol1.getNome(), "nome");
-                assertEquals(email1, sol1.getEmail(), "email");
+                //assertEquals(email1, sol1.getEmail(), "email");
                 assertEquals("Aberta", sol1.getStatus(), "status");
-                assertEquals(pasta1, sol1.getLinkPasta(), "linkPasta");
+                //assertEquals(pasta1, sol1.getLinkPasta(), "linkPasta");
             }
 
             // TESTE 2: atualizar status
@@ -56,7 +55,7 @@ public class AlunoServiceTest {
             Long matricula2 = 888L;
             String nome2 = "Aluno2";
             String pasta2 = fileService.createFolder(nome2, TEST_PARENT_ID);
-            alunoService.criarSolicitacao(matricula2, nome2, "status2@uni.br", "EXTENSAO", pasta2);
+            //alunoService.criarSolicitacao(matricula2, nome2, "status2@uni.br", "EXTENSAO", pasta2);
             alunoService.atualizarStatus(matricula2, "Aberto");
 
             Solicitacao sol2 = solicitacaoService.listarSolicitacoesPorNome(nome2).get(0);
@@ -67,7 +66,7 @@ public class AlunoServiceTest {
             Long matricula3 = 999L;
             String nome3 = "Aluno3";
             String pasta3 = fileService.createFolder(nome3, TEST_PARENT_ID);
-            alunoService.criarSolicitacao(matricula3, nome3, "drive3@uni.br", "EXTENSAO", pasta3);
+            alunoService.criarSolicitacao(matricula3, nome3, "EXTENSAO");
             Solicitacao sol3 = solicitacaoService.listarSolicitacoesPorNome(nome3).get(0);
 
             File tmp = new File("teste.pdf");

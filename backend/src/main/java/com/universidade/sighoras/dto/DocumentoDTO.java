@@ -1,4 +1,4 @@
-package com.universidade.sighoras.controller;
+package com.universidade.sighoras.dto;
 
 public class DocumentoDTO {
     private Long id;

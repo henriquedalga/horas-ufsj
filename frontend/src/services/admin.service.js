@@ -14,11 +14,11 @@ class AdminService {
   }
 
   async getComplementar() {
-    return await api("/complementar", { method: "GET" });
+    return await api("solicitacoes/complementar", { method: "GET" });
   }
 
   async getExtensao() {
-    return await api("/extensao", { method: "GET" });
+    return await api("/solicitacoes/extensao", { method: "GET" });
   }
 
   async postComplementarById(id, data) {

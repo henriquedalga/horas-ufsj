@@ -1,4 +1,4 @@
-package com.universidade.sighoras.controller;
+package com.universidade.sighoras.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
