@@ -126,6 +126,7 @@ public class AlunoRestController {
             e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
+    }
     /**
      * Lista todos os arquivos de uma solicitação
      */
@@ -135,4 +136,5 @@ public class AlunoRestController {
     ) {
         return alunoService.listarArquivos(idSolicitacao);
     }
+    
 }

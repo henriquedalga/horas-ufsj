@@ -100,8 +100,10 @@ public class AlunoService {
             arquivo.transferTo(tempFile);
             
             int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
+            // Extrai o ID da pasta do link completo
+            String folderId = extractFolderIdFromUrl(sol.getLinkPasta());
             // Faz upload e captura o ID do arquivo retornado
-            fileId = fileService.uploadFile(tempFile, sol.getLinkPasta(), hourType);
+            fileId = fileService.uploadFile(tempFile, folderId, hourType);
             // Obtém o link do arquivo usando o ID
             driveUrl = fileService.getFileLink(fileId, hourType);
             
@@ -206,6 +208,25 @@ public class AlunoService {
             return link.split("id=")[1].split("&")[0];
         } else {
             throw new IllegalArgumentException("Link do arquivo inválido: " + link);
+        }
+    }
+
+        /**
+     * Extrai o ID da pasta de uma URL do Google Drive
+     */
+    private String extractFolderIdFromUrl(String url) {
+        if (url == null) {
+            throw new IllegalArgumentException("URL da pasta é nula");
+        }
+        
+        // Verifica se é uma URL completa ou apenas o ID
+        if (url.contains("/")) {
+            // Formato: https://drive.google.com/drive/folders/1_xwa2akI1qjznKflfSqj3tdMcq-qvERp
+            String[] parts = url.split("/");
+            return parts[parts.length - 1].replace(".", ""); // Remove o ponto no final, se existir
+        } else {
+            // Já é apenas o ID
+            return url;
         }
     }
 
