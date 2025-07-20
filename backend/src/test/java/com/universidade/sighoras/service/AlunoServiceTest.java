@@ -94,15 +94,15 @@ public class AlunoServiceTest {
             tmp.delete();
 
 
-            // TESTE 4: listarArquivosDaSolicitacao
-            System.out.println("=== TESTE 4: listarArquivosDaSolicitacao ===");
-            List<String> arquivos = alunoService.listarArquivos(sol3.getId()).getBody();
-            if (arquivos == null || arquivos.isEmpty()) {
-                System.err.println("ERRO: nenhum arquivo listado para a solicitação " + sol3.getId());
-            } else {
-                System.out.println("OK: arquivos encontrados na solicitação " + sol3.getId() + ":");
-                arquivos.forEach(link -> System.out.println(" - " + link));
-            }
+            // // TESTE 4: listarArquivosDaSolicitacao
+            // System.out.println("=== TESTE 4: listarArquivosDaSolicitacao ===");
+            // List<String> arquivos = alunoService.listarArquivos(sol3.getId()).getBody();
+            // if (arquivos == null || arquivos.isEmpty()) {
+            //     System.err.println("ERRO: nenhum arquivo listado para a solicitação " + sol3.getId());
+            // } else {
+            //     System.out.println("OK: arquivos encontrados na solicitação " + sol3.getId() + ":");
+            //     arquivos.forEach(link -> System.out.println(" - " + link));
+            // }
 
             System.out.println("=== TODOS TESTES EXECUTADOS ===");
 

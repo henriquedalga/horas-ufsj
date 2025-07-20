@@ -28,9 +28,12 @@ public class Funcionario {
     private String email;
     private String senha;
     
+    private String role;
+
     // Construtor sem o campo ID
     public Funcionario(String email, String senha) {
         this.email = email;
         this.senha = senha;
+        this.role = "Mod"; // Status padrão
     }
 }

@@ -14,7 +14,7 @@ class AdminService {
   }
 
   async getComplementar() {
-    return await api("solicitacoes/complementar", { method: "GET" });
+    return await api("/solicitacoes/complementar", { method: "GET" });
   }
 
   async getExtensao() {

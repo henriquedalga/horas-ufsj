@@ -1,6 +1,7 @@
 package com.universidade.sighoras.controller;
 
 import com.universidade.sighoras.dto.SolicitacaoRequestDTO;
+import com.universidade.sighoras.entity.Arquivo;
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.service.AlunoService;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +23,28 @@ public class AlunoRestController {
      * Criar nova solicitação
      */
     @PostMapping("/aluno/solicitacao/extensao")
-    public ResponseEntity<Solicitacao> verificarSolicitacao(@RequestBody SolicitacaoRequestDTO solicitacaoDTO) {
-    // Chama o serviço para criar a solicitação
-    Solicitacao sol = alunoService.verificarOuCriarSolicitacao(
-            solicitacaoDTO.getMatricula(), 
-            solicitacaoDTO.getNome(), 
-            solicitacaoDTO.getHoraTipo()
-    );
-    return ResponseEntity.ok(sol);
+    public ResponseEntity<Solicitacao> verificarSolicitacaoE(@RequestBody SolicitacaoRequestDTO solicitacaoDTO) {
+        // Chama o serviço para criar a solicitação
+        Solicitacao sol = alunoService.verificarOuCriarSolicitacao(
+                solicitacaoDTO.getMatricula(), 
+                solicitacaoDTO.getNome(), 
+                solicitacaoDTO.getHoraTipo()
+        );
+        return ResponseEntity.ok(sol);
+    }
+
+        /**
+     * Criar nova solicitação
+     */
+    @PostMapping("/aluno/solicitacao/complementar")
+    public ResponseEntity<Solicitacao> verificarSolicitacaoC(@RequestBody SolicitacaoRequestDTO solicitacaoDTO) {
+        // Chama o serviço para criar a solicitação
+        Solicitacao sol = alunoService.verificarOuCriarSolicitacao(
+                solicitacaoDTO.getMatricula(), 
+                solicitacaoDTO.getNome(), 
+                solicitacaoDTO.getHoraTipo()
+        );
+        return ResponseEntity.ok(sol);
     }
 
     /**
@@ -47,9 +62,9 @@ public class AlunoRestController {
      * Adicionar arquivo (chama AlunoService.verificarPermissaoModificacao)
      */
     @PostMapping("/solicitacao/{id}/arquivo")
-    public ResponseEntity<Void> adicionarArquivo(@PathVariable Long idSolicitacao,
+    public ResponseEntity<Void> adicionarArquivo(@PathVariable Long id,
                                                 @RequestParam("arquivo") MultipartFile arquivo) {
-        alunoService.adicionarArquivo(idSolicitacao, arquivo);
+        alunoService.adicionarArquivo(id, arquivo);
         return ResponseEntity.ok().build();
     }
 
@@ -58,10 +73,10 @@ public class AlunoRestController {
      */
     @DeleteMapping("/solicitacao/{id}/arquivo")
     public ResponseEntity<Void> removerArquivo(
-            @PathVariable("id") Long idSolicitacao,
+            @PathVariable("id") Long id,
             @RequestParam("link") String linkArquivo
     ) {
-        alunoService.removerArquivo(idSolicitacao, linkArquivo);
+        alunoService.removerArquivo(id, linkArquivo);
         return ResponseEntity.ok().build();
     }
 
@@ -104,6 +119,19 @@ public class AlunoRestController {
         return alunoService.listarPorNome(nome);
     }
 
+    @GetMapping("/extensao/{id}")
+    public ResponseEntity<Solicitacao> buscarArquivosExtensaoPorId(
+            @PathVariable Long id
+    ) {
+        return alunoService.buscarPorId(id);
+    }
+    @GetMapping("/complementar/{id}")
+    public ResponseEntity<Solicitacao> buscarArquivosComplementarPorId(
+            @PathVariable Long id
+    ) {
+        return alunoService.buscarPorId(id);
+    }
+
 
     /////////
     /// Métodos de testes para utilizar no postman 
@@ -131,7 +159,7 @@ public class AlunoRestController {
      * Lista todos os arquivos de uma solicitação
      */
     @GetMapping("/solicitacao/{id}/arquivos")
-    public ResponseEntity<List<String>> listarArquivos(
+    public ResponseEntity<List<Arquivo>> listarArquivos(
             @PathVariable("id") Long idSolicitacao
     ) {
         return alunoService.listarArquivos(idSolicitacao);

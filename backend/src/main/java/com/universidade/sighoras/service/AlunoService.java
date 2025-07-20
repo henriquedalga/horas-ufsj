@@ -185,15 +185,38 @@ public class AlunoService {
     /**
      * Lista todos os arquivos de uma solicitação.
      */
-    public ResponseEntity<List<String>> listarArquivos(Long idSolicitacao) {
-        Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
-        int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
-        try {
-            List<String> links = fileService.listFileLinks(sol.getLinkPasta(), hourType);
-            return ResponseEntity.ok(links);
-        } catch (IOException e) {
-            throw new RuntimeException("Erro ao listar arquivos do Drive", e);
-        }
+    public ResponseEntity<List<Arquivo>> listarArquivos(Long idSolicitacao) {
+            System.out.println("==================================");
+            System.out.println("Listando arquivos da solicitação: " + idSolicitacao);
+            Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
+            System.out.println("==================================");
+            System.out.println("Passou!!!!: " + idSolicitacao);
+
+            if (sol == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            try {
+                List<Arquivo> links = sol.getDocumentos();
+
+                System.out.println("==================================");
+                System.out.println("Listando arquivos da solicitação: " + idSolicitacao);
+                System.out.println("Total de arquivos: " + links.size());
+                for (Arquivo arquivo : links) {
+                    System.out.println("Arquivo: " + arquivo.getNomeArquivo() + " - Link: " + arquivo.getUrl());
+                }
+                System.out.println("==================================");
+                return ResponseEntity.ok(links);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(500).build();
+            }
+        // try {
+        //     List<String> links = fileService.listFileLinks(sol.getLinkPasta(), hourType);
+        //     return ResponseEntity.ok(links);
+        // } catch (IOException e) {
+        //     throw new RuntimeException("Erro ao listar arquivos do Drive", e);
+        // }
     }
 
     /**
