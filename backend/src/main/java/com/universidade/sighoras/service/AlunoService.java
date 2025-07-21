@@ -2,14 +2,18 @@ package com.universidade.sighoras.service;
 
 import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Solicitacao;
+import com.universidade.sighoras.entity.Arquivo;
+import com.universidade.sighoras.service.ArquivoService;
 import com.universidade.sighoras.service.EmailService;
 import IntegrandoDrive.service.FileService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AlunoService {
@@ -17,11 +21,13 @@ public class AlunoService {
     private final SolicitacaoService solicitacaoService;
     private final FileService fileService;
     private final EmailService emailService;
+    private final ArquivoService arquivoService;
 
-    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService, EmailService emailService) {
+    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService, EmailService emailService, ArquivoService arquivoService) {
         this.solicitacaoService = solicitacaoService;
         this.fileService = fileService;
         this.emailService = emailService;
+        this.arquivoService = arquivoService;
     }
 
     /**
@@ -78,8 +84,12 @@ public class AlunoService {
             java.io.File tempFile = java.io.File.createTempFile("upload-", arquivo.getOriginalFilename());
             arquivo.transferTo(tempFile);
             int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
-            fileService.uploadFile(tempFile, sol.getLinkPasta(), hourType);
+            String drivelink = fileService.uploadFile(tempFile, sol.getLinkPasta(), hourType);
             tempFile.delete(); // limpa depois
+
+            //salvando metadados
+            arquivoService.salvarArquivo(sol.getId(), arquivo.getOriginalFilename(), drivelink, null);
+
         } catch (IOException e) {
             throw new RuntimeException("Erro ao fazer upload para o Drive", e);
         }
@@ -96,6 +106,8 @@ public class AlunoService {
             String fileId = extrairFileIdDoLink(linkArquivo);
             int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
             fileService.deleteFile(fileId, hourType);
+
+            arquivoService.excluirPorDriveLink(fileId);
         } catch (IOException e) {
             throw new RuntimeException("Erro ao remover arquivo do Drive", e);
         }

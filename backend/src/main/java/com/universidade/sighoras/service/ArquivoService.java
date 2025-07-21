@@ -1,45 +1,76 @@
 package com.universidade.sighoras.service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import com.universidade.sighoras.entity.Arquivo;
 import com.universidade.sighoras.repository.ArquivoRepository;
 
-
+@Service
 public class ArquivoService {
-    // Aqui você pode adicionar métodos para manipular arquivos, como upload, download, etc.
-    // Por exemplo:
+
     private final ArquivoRepository arquivoRepository;
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    
-
+    @Autowired
     public ArquivoService(ArquivoRepository arquivoRepository) {
         this.arquivoRepository = arquivoRepository;
     }
-    // Método para fazer upload de um arquivo
-    public void uploadArquivo(Arquivo arquivo) {
-        // Lógica para fazer upload do arquivo
-        arquivoRepository.save(arquivo);
-        //chamar Drive service para fazer upload no Google Drive
 
-    }
-    
-    // Método para excluir um arquivo
-    public void excluirArquivo(Long id) {
-        // Lógica para excluir o arquivo com o ID fornecido
+    /**
+     * Salva um registro de Arquivo no banco.
+     */
+    public Arquivo salvarArquivo(Long idSolicitacao,
+                                 String nomeArquivo,
+                                 String drivelink,
+                                 String comentario) {
+        Arquivo arq = new Arquivo();
+        arq.setIdSolicitacao(idSolicitacao);
+        arq.setNomeArquivo(nomeArquivo);
+        arq.setDrivelink(drivelink);
+        arq.setComentario(comentario);
+        arq.setData(LocalDateTime.now().format(ISO_FORMATTER));
+        return arquivoRepository.save(arq);
     }
 
-    // Método para obter um arquivo por ID
-    public Arquivo obterArquivoPorId(Long id) {
-        // Lógica para obter o arquivo com o ID fornecido
-        return null; // Retorne o arquivo encontrado ou null se não encontrado
+    /**
+     * Lista todos os arquivos vinculados a uma solicitação.
+     */
+    public List<Arquivo> listarPorSolicitacao(Long idSolicitacao) {
+        return arquivoRepository.findByIdSolicitacao(idSolicitacao);
     }
-    
-    // Método para listar todos os arquivos
-    public List<Arquivo> listarArquivos() {
-        // Lógica para listar todos os arquivos
-        return new ArrayList<>(); // Retorne a lista de arquivos
+
+    /**
+     * Exclui o metadado de um arquivo pelo seu DriveLink.
+     */
+    public void excluirPorDriveLink(String drivelink) {
+        Optional<Arquivo> arq = arquivoRepository.findByDrivelink(drivelink);
+        if (arq.isPresent()) {
+            arquivoRepository.delete(arq.get());
+        } else {
+            throw new RuntimeException("Arquivo não encontrado no banco com o link fornecido.");
+        }
     }
-    // Outros métodos relacionados a arquivos podem ser adicionados aqui
+
+        /**
+     * Atualiza o comentário de um Arquivo existente identificado pelo driveLink.
+     */
+    @Transactional
+    public Arquivo atualizarComentario(String drivelink, String comentario) {
+        Optional<Arquivo> opt = arquivoRepository.findByDrivelink(drivelink);
+        if (opt.isEmpty()) {
+            throw new RuntimeException("Arquivo não encontrado: " + drivelink);
+        }
+        Arquivo arq = opt.get();
+        arq.setComentario(comentario);
+        arq.setData(LocalDateTime.now().format(ISO_FORMATTER));
+        return arquivoRepository.save(arq);
+    }
 }

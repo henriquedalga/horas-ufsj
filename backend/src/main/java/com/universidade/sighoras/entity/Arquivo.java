@@ -23,7 +23,7 @@ public class Arquivo {
     
     private Long idSolicitacao;
     private String nomeArquivo;
-    private String Drivelink;
+    private String drivelink;
     private String Comentario;
     private String data;
 }

@@ -119,11 +119,30 @@
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <version>3.1.0</version>
-            <configuration>
+            <executions>
+            <!-- AlunoServiceTest -->
+            <execution>
+                <id>run-aluno-service-test</id>
+                <goals>
+                <goal>java</goal>
+                </goals>
+                <configuration>
                 <mainClass>com.universidade.sighoras.service.AlunoServiceTest</mainClass>
-                <!-- Incluir classes de teste e resources de teste -->
                 <classpathScope>test</classpathScope>
-            </configuration>
+                </configuration>
+            </execution>
+            <!-- FuncionarioEdicaoTest -->
+            <execution>
+                <id>run-funcionario-edicao-test</id>
+                <goals>
+                <goal>java</goal>
+                </goals>
+                <configuration>
+                <mainClass>com.universidade.sighoras.service.FuncionarioEdicaoTest</mainClass>
+                <classpathScope>test</classpathScope>
+                </configuration>
+            </execution>
+            </executions>
             </plugin>
         </plugins>
     </build>
