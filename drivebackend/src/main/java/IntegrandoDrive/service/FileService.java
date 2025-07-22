@@ -26,12 +26,12 @@ public class FileService {
         return hourType == 1 ? persExt : persComp;
     }
 
-    /**
+     /**
      * Cria uma pasta no Drive, se não existir.
      */
-    public String createFolder(String nome, String parentFolderId, int hourType) throws IOException {
-        return selectPersistence(hourType)
-               .createFolderIfNotExists(nome, parentFolderId);
+    public String createFolder(String nome, int hourType) throws IOException {
+        DrivePersistence persistence = selectPersistence(hourType);
+        return persistence.createFolderIfNotExists(nome, persistence.getDefaultParentFolderId());
     }
 
     /**

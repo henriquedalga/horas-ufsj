@@ -5,6 +5,10 @@ import lombok.*;
 import java.util.List;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import com.universidade.sighoras.entity.Arquivo;
+
 @Table(name = "solicitacao")
 @Entity
 @NoArgsConstructor
@@ -25,8 +29,20 @@ public class Solicitacao {
     private String dataSolicitacao; // Data do envio da solicitação
     private String linkPasta; // Link da pasta do Google Drive
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_solicitacao")
+    private List<Arquivo> documentos = new ArrayList<>();
+
     public void setHoraTipoStr(String horaString) {
         this.horaTipo = HoraTipo.valueOf(horaString);
+    }
+
+    //adicionar um arquivo à solicitação
+    public void adicionarArquivo(Arquivo arquivo) {
+        if (this.documentos == null) {
+            this.documentos = new ArrayList<>();   
+        }
+        this.documentos.add(arquivo);
     }
 
 }

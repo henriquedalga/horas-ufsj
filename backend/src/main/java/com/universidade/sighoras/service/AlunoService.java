@@ -4,7 +4,7 @@ import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.entity.Arquivo;
 import com.universidade.sighoras.service.ArquivoService;
-import com.universidade.sighoras.service.EmailService;
+//import com.universidade.sighoras.service.EmailService;
 import IntegrandoDrive.service.FileService;
 
 import org.springframework.http.ResponseEntity;
@@ -20,13 +20,13 @@ public class AlunoService {
 
     private final SolicitacaoService solicitacaoService;
     private final FileService fileService;
-    private final EmailService emailService;
+    //private final EmailService emailService;
     private final ArquivoService arquivoService;
 
-    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService, EmailService emailService, ArquivoService arquivoService) {
+    public AlunoService(SolicitacaoService solicitacaoService, FileService fileService, ArquivoService arquivoService) {
         this.solicitacaoService = solicitacaoService;
         this.fileService = fileService;
-        this.emailService = emailService;
+        //this.emailService = emailService;
         this.arquivoService = arquivoService;
     }
 
@@ -35,14 +35,31 @@ public class AlunoService {
      */
     public ResponseEntity<Void> criarSolicitacao(Long matricula,
                                                  String nome,
-                                                 String email,
-                                                 String horaTipo,
-                                                 String linkPasta) {
+                                                 String horaTipo) {
         // Sempre pode criar enquanto não houver pendente
-        solicitacaoService.criarSolicitacao(matricula, nome, email, horaTipo, linkPasta);
+        HoraTipo tipo = HoraTipo.valueOf(horaTipo.toUpperCase());
+        try {
+            solicitacaoService.criarSolicitacao(matricula, nome, tipo);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return ResponseEntity.ok().build();
     }
-
+    /**
+     * Verifica se uma solicitação existe, se não, cria uma nova.
+     * @return A solicitação existente ou recém-criada
+     */
+    public Solicitacao verificarOuCriarSolicitacao(Long matricula, String nome, HoraTipo horaTipo) {
+        try {
+            return solicitacaoService.criarSolicitacao(matricula, nome, horaTipo);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
     /**
      * Atualiza o status de uma solicitação existente.
      */
@@ -60,12 +77,13 @@ public class AlunoService {
 
         int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
         try {
-            fileService.finalizeSubmission(sol.getLinkPasta(), hourType);
+            String folderId = extractFolderIdFromUrl(sol.getLinkPasta());
+            fileService.finalizeSubmission(folderId, hourType);
         } catch (IOException e) {
             throw new RuntimeException("Erro ao finalizar submissão no Drive", e);
         }
 
-        emailService.sendSubmissionEmail(sol);
+        //emailService.sendSubmissionEmail(sol);
 
         solicitacaoService.atualizarStatus(sol.getMatricula(), "Pendente");
 
@@ -78,13 +96,13 @@ public class AlunoService {
     public void adicionarArquivo(Long idSolicitacao, MultipartFile arquivo) {
         Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
         verificarPermissaoModificacao(sol);
-
         try {
             // Converte MultipartFile para File temporário
             java.io.File tempFile = java.io.File.createTempFile("upload-", arquivo.getOriginalFilename());
             arquivo.transferTo(tempFile);
             int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
-            String drivelink = fileService.uploadFile(tempFile, sol.getLinkPasta(), hourType);
+            String fileID = extractFolderIdFromUrl(sol.getLinkPasta());
+            String drivelink = fileService.uploadFile(tempFile, fileID, hourType);
             tempFile.delete(); // limpa depois
 
             //salvando metadados
@@ -146,7 +164,8 @@ public class AlunoService {
         Solicitacao sol = solicitacaoService.obterSolicitacaoPorId(idSolicitacao);
         int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
         try {
-            List<String> links = fileService.listFileLinks(sol.getLinkPasta(), hourType);
+            String folderId = extractFolderIdFromUrl(sol.getLinkPasta());
+            List<String> links = fileService.listFileLinks(folderId, hourType);
             return ResponseEntity.ok(links);
         } catch (IOException e) {
             throw new RuntimeException("Erro ao listar arquivos do Drive", e);
@@ -165,6 +184,25 @@ public class AlunoService {
             return link.split("id=")[1].split("&")[0];
         } else {
             throw new IllegalArgumentException("Link do arquivo inválido: " + link);
+        }
+    }
+
+    /**
+     * Extrai o ID da pasta de uma URL do Google Drive
+     */
+    private String extractFolderIdFromUrl(String url) {
+        if (url == null) {
+            throw new IllegalArgumentException("URL da pasta é nula");
+        }
+        
+        // Verifica se é uma URL completa ou apenas o ID
+        if (url.contains("/")) {
+            // Formato: https://drive.google.com/drive/folders/1_xwa2akI1qjznKflfSqj3tdMcq-qvERp
+            String[] parts = url.split("/");
+            return parts[parts.length - 1].replace(".", ""); // Remove o ponto no final, se existir
+        } else {
+            // Já é apenas o ID
+            return url;
         }
     }
 

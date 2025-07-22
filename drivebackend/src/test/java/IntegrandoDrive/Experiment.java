@@ -23,16 +23,13 @@ public class Experiment {
             FileService fileService = new FileService(persistenceComp, persistenceExt);
 
             // 4) Escolhe tipo de hora a testar (0=complementar, 1=extensão)
-            int hourType = 0;
+            int hourType = 1;
 
             // 5) Define nome do aluno e pasta pai correspondente
-            String nomeAluno = "Naan";
-            String parentId  = (hourType == 0)
-                ? "1kr-It-ec_y9gCz62gF5TevDm3q-9knkl"
-                : "1ouyNWdAy0SlDKrZN_ixPYityxQ1UtVdv";
+            String nomeAluno = "TesteHoje";
 
             // 6) Cria ou recupera a pasta do aluno
-            String pastaId = fileService.createFolder(nomeAluno, parentId, hourType);
+            String pastaId = fileService.createFolder(nomeAluno, hourType);
             System.out.println(">> Pasta criada ou existente: " + pastaId);
 
             // 7) Faz upload de um arquivo

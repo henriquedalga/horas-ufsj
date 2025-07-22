@@ -10,7 +10,7 @@ public interface ArquivoRepository  extends JpaRepository<Arquivo, Long> {
 
     
     List<Arquivo> findByIdSolicitacao(Long idSolicitacao);
-   Optional<Arquivo> findByDrivelink(String drivelink);
-    void deleteByDrivelink(String drivelink); 
+   Optional<Arquivo> findByUrl(String url);
+    void deleteByUrl(String url);
 }
 

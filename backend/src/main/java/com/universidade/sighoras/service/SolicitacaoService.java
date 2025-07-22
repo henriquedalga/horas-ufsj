@@ -7,6 +7,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.repository.SolicitacaoRepository;
 import IntegrandoDrive.service.FileService;
@@ -30,16 +33,34 @@ public class SolicitacaoService {
 
     // Métodos de CRUD
     
-    public void criarSolicitacao(Long matricula, String nome, String email, String horaTipo, String linkPasta) {
-        // Lógica para criar uma nova solicitação
+    public Solicitacao criarSolicitacao(Long matricula, String nome, HoraTipo horaTipo) throws IOException {
+        // Verifica se já existe uma solicitação com a mesma matrícula e tipo de hora
+        Solicitacao solicitacaoExistente = solicitacaoRepository
+                .findByMatriculaAndHoraTipo(matricula, horaTipo);
+        
+        // Se já existir, retorna a solicitação existente sem alterações
+        if (solicitacaoExistente != null) {
+            System.out.println("Solicitação já existe para matrícula " + matricula + 
+                    " e tipo de hora " + horaTipo);
+            return solicitacaoExistente;
+        }
+        
+        // Se não existir, cria uma nova solicitação
+        System.out.println("Criando nova solicitação para matrícula " + matricula + 
+                " e tipo de hora " + horaTipo);
+        
         Solicitacao solicitacao = new Solicitacao();
         solicitacao.setMatricula(matricula);
         solicitacao.setNome(nome);
-        solicitacao.setEmail(email);
-        solicitacao.setHoraTipoStr(horaTipo);
-        solicitacao.setLinkPasta(linkPasta);
-        solicitacao.setStatus("Aberta"); // Definindo status inicial como Pendente
-        solicitacaoRepository.save(solicitacao);
+        solicitacao.setHoraTipo(horaTipo);
+        solicitacao.setStatus("Aberta"); // Status inicial
+        solicitacao.setDataSolicitacao(new java.util.Date().toString()); // Data atual como string
+         int hourTypeInt = (horaTipo == HoraTipo.EXTENSAO) ? 1 : 0;
+        String folderId = fileService.createFolder(matricula.toString(), hourTypeInt);
+        solicitacao.setLinkPasta(fileService.getFolderLink(folderId, hourTypeInt));
+        
+        // Salva e retorna a nova solicitação
+        return solicitacaoRepository.save(solicitacao);
     }
     
     public void atualizarStatus(Long matricula, String status) {
@@ -90,7 +111,8 @@ public class SolicitacaoService {
 
         // Marca a pasta no Drive como somente leitura
         int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
-        fileService.finalizeSubmission(sol.getLinkPasta(), hourType);
+        String folderId = extractFolderIdFromUrl(sol.getLinkPasta());
+        fileService.finalizeSubmission(folderId, hourType);
     }
 
     @Transactional
@@ -109,7 +131,33 @@ public class SolicitacaoService {
 
         // Torna a pasta editável novamente no Drive
         int hourType = sol.getHoraTipo() == HoraTipo.EXTENSAO ? 1 : 0;
-        fileService.rejectSubmission(sol.getLinkPasta(), hourType);
+        String folderId = extractFolderIdFromUrl(sol.getLinkPasta());
+        fileService.rejectSubmission(folderId, hourType);
+    }
+    
+    // Método de conveniência específico para EXTENSAO
+    public List<Solicitacao> listarSolicitacoesExtensao() {
+        return solicitacaoRepository.findByHoraTipo(HoraTipo.EXTENSAO);
+    }
+
+     // Método de conveniência específico para EXTENSAO
+    public List<Solicitacao> listarSolicitacoesComplementar() {
+        return solicitacaoRepository.findByHoraTipo(HoraTipo.COMPLEMENTAR);
+    }
+        private String extractFolderIdFromUrl(String url) {
+        if (url == null) {
+            throw new IllegalArgumentException("URL da pasta é nula");
+        }
+        
+        // Verifica se é uma URL completa ou apenas o ID
+        if (url.contains("/")) {
+            // Formato: https://drive.google.com/drive/folders/1_xwa2akI1qjznKflfSqj3tdMcq-qvERp
+            String[] parts = url.split("/");
+            return parts[parts.length - 1].replace(".", ""); // Remove o ponto no final, se existir
+        } else {
+            // Já é apenas o ID
+            return url;
+        }
     }
 
 }

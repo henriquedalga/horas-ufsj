@@ -34,8 +34,8 @@ public class ArquivoService {
         Arquivo arq = new Arquivo();
         arq.setIdSolicitacao(idSolicitacao);
         arq.setNomeArquivo(nomeArquivo);
-        arq.setDrivelink(drivelink);
-        arq.setComentario(comentario);
+        arq.setUrl(drivelink);
+        arq.setComent(comentario);
         arq.setData(LocalDateTime.now().format(ISO_FORMATTER));
         return arquivoRepository.save(arq);
     }
@@ -51,7 +51,7 @@ public class ArquivoService {
      * Exclui o metadado de um arquivo pelo seu DriveLink.
      */
     public void excluirPorDriveLink(String drivelink) {
-        Optional<Arquivo> arq = arquivoRepository.findByDrivelink(drivelink);
+        Optional<Arquivo> arq = arquivoRepository.findByUrl(drivelink);
         if (arq.isPresent()) {
             arquivoRepository.delete(arq.get());
         } else {
@@ -64,12 +64,12 @@ public class ArquivoService {
      */
     @Transactional
     public Arquivo atualizarComentario(String drivelink, String comentario) {
-        Optional<Arquivo> opt = arquivoRepository.findByDrivelink(drivelink);
+        Optional<Arquivo> opt = arquivoRepository.findByUrl(drivelink);
         if (opt.isEmpty()) {
             throw new RuntimeException("Arquivo não encontrado: " + drivelink);
         }
         Arquivo arq = opt.get();
-        arq.setComentario(comentario);
+        arq.setComent(comentario);
         arq.setData(LocalDateTime.now().format(ISO_FORMATTER));
         return arquivoRepository.save(arq);
     }

@@ -1,6 +1,7 @@
 package com.universidade.sighoras.service;
 
 import com.universidade.sighoras.HorasUfsjApplication;
+import com.universidade.sighoras.entity.HoraTipo;
 import com.universidade.sighoras.entity.Arquivo;
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.service.ArquivoService;
@@ -36,18 +37,17 @@ public class FuncionarioEdicaoTest {
             System.out.println("\n=== SETUP: criando 3 solicitações de aluno com arquivos ===");
             for (int i = 1; i <= 3; i++) {
                 String nome = "Aluno" + i;
-                String tipo = (i % 2 == 0) ? "EXTENSAO" : "COMPLEMENTAR";
-                String pasta = fileService.createFolder(nome, 
-                    tipo.equals("EXTENSAO") ? PARENT_ID_EXT : PARENT_ID_COMP, 1);
+                // escolhe o enum — só EXTENSAO ou COMPLEMENTAR
+                HoraTipo tipoEnum = (i % 2 == 0)
+                    ? HoraTipo.EXTENSAO
+                    : HoraTipo.COMPLEMENTAR;
 
                 // cria a solicitacao (retorno void)
                 Long matricula = 1000L + i;
                 solicitacaoService.criarSolicitacao(
                     matricula,
                     nome,
-                    nome.toLowerCase() + "@email.com",
-                    tipo,
-                    pasta
+                    tipoEnum
                 );
                 // recupera a solicitacao criada
                 List<Solicitacao> list = solicitacaoService.listarSolicitacoesPorNome(nome);
@@ -102,7 +102,7 @@ public class FuncionarioEdicaoTest {
             for (Arquivo arq : arquivosSol2) {
                 String nomeArq = arq.getNomeArquivo();
                 String comentario = nomeArq.contains("_1") ? "Sem assinatura" : "Revisão necessária";
-                comentarios.put(arq.getDrivelink(), comentario);
+                comentarios.put(arq.getUrl(), comentario);
             }
             solicitacaoService.reprovarSolicitacao(sol2.getId(), comentarios);
             Solicitacao solRej = solicitacaoService.obterSolicitacaoPorId(sol2.getId());
@@ -113,7 +113,7 @@ public class FuncionarioEdicaoTest {
             for (Arquivo arq : verif) {
                 String nomeArq = arq.getNomeArquivo();
                 String esperado = nomeArq.contains("_1") ? "Sem assinatura" : "Revisão necessária";
-                assertEqual(esperado, arq.getComentario(), "Comentário atualizado para " + nomeArq);
+                assertEqual(esperado, arq.getComent(), "Comentário atualizado para " + nomeArq);
             }
 
             System.out.println("\n=== TODOS TESTES DO FUNCIONARIO EXECUTADOS ===");

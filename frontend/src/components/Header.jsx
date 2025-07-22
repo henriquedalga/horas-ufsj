@@ -5,8 +5,8 @@ import AuthService from "../services/auth.service";
 
 export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [theme, setTheme] = useState("light");
+  /*   const [userName, setUserName] = useState("");
+   */ const [theme, setTheme] = useState("light");
   const navigate = useNavigate();
 
   const handleAuthAction = () => {
@@ -27,7 +27,7 @@ export default function Header() {
     console.log(user.name);
     if (user) {
       setIsAuthenticated(true);
-      setUserName(user.name); // substitua "nome" pela chave correta se for diferente
+      /*       setUserName(user.name);  */ // substitua "nome" pela chave correta se for diferente
     }
     if (window.core?.BRHeader) {
       const headerList = [];
@@ -101,9 +101,9 @@ export default function Header() {
             </div>
             <div className="header-info">
               <div className="header-title">Entrega de Horas UFSJ</div>
-              <div className="header-subtitle">
+              {/*               <div className="header-subtitle">
                 Olá, {userName || "Usuário não identificado"}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

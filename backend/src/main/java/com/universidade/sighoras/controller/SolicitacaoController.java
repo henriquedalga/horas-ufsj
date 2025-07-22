@@ -22,9 +22,15 @@ public class SolicitacaoController {
     @Autowired
     private SolicitacaoService service;
 
-    @GetMapping("/solicitacoes")
+    @GetMapping("/solicitacoes/extensao")
     public ResponseEntity<?> solicitacoes() {
-        List<Solicitacao> solicitacoes = service.listarSolicitacoes();
+        List<Solicitacao> solicitacoes = service.listarSolicitacoesExtensao();
+        return ResponseEntity.ok(solicitacoes);
+    }
+
+    @GetMapping("/solicitacoes/complementar")
+    public ResponseEntity<?> solicitacoesComplementar() {
+        List<Solicitacao> solicitacoes = service.listarSolicitacoesComplementar();
         return ResponseEntity.ok(solicitacoes);
     }
 

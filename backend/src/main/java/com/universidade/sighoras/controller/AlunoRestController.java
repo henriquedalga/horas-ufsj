@@ -1,5 +1,7 @@
 package com.universidade.sighoras.controller;
 
+import com.universidade.sighoras.dto.SolicitacaoRequestDTO;
+import com.universidade.sighoras.entity.Arquivo;
 import com.universidade.sighoras.entity.Solicitacao;
 import com.universidade.sighoras.service.AlunoService;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/aluno")
-@CrossOrigin(origins = "*")
 public class AlunoRestController {
 
     private final AlunoService alunoService;
@@ -22,15 +22,29 @@ public class AlunoRestController {
     /**
      * Criar nova solicitação
      */
-    @PostMapping("/solicitacao")
-    public ResponseEntity<Void> criarSolicitacao(
-            @RequestParam Long matricula,
-            @RequestParam String nome,
-            @RequestParam String email,
-            @RequestParam String horaTipo,
-            @RequestParam String linkPasta
-    ) {
-        return alunoService.criarSolicitacao(matricula, nome, email, horaTipo, linkPasta);
+    @PostMapping("/aluno/solicitacao/extensao")
+    public ResponseEntity<Solicitacao> verificarSolicitacaoE(@RequestBody SolicitacaoRequestDTO solicitacaoDTO) {
+        // Chama o serviço para criar a solicitação
+        Solicitacao sol = alunoService.verificarOuCriarSolicitacao(
+                solicitacaoDTO.getMatricula(), 
+                solicitacaoDTO.getNome(), 
+                solicitacaoDTO.getHoraTipo()
+        );
+        return ResponseEntity.ok(sol);
+    }
+
+        /**
+     * Criar nova solicitação
+     */
+    @PostMapping("/aluno/solicitacao/complementar")
+    public ResponseEntity<Solicitacao> verificarSolicitacaoC(@RequestBody SolicitacaoRequestDTO solicitacaoDTO) {
+        // Chama o serviço para criar a solicitação
+        Solicitacao sol = alunoService.verificarOuCriarSolicitacao(
+                solicitacaoDTO.getMatricula(), 
+                solicitacaoDTO.getNome(), 
+                solicitacaoDTO.getHoraTipo()
+        );
+        return ResponseEntity.ok(sol);
     }
 
     /**
@@ -48,9 +62,9 @@ public class AlunoRestController {
      * Adicionar arquivo (chama AlunoService.verificarPermissaoModificacao)
      */
     @PostMapping("/solicitacao/{id}/arquivo")
-    public ResponseEntity<Void> adicionarArquivo(@PathVariable Long idSolicitacao,
+    public ResponseEntity<Void> adicionarArquivo(@PathVariable Long id,
                                                 @RequestParam("arquivo") MultipartFile arquivo) {
-        alunoService.adicionarArquivo(idSolicitacao, arquivo);
+        alunoService.adicionarArquivo(id, arquivo);
         return ResponseEntity.ok().build();
     }
 
@@ -59,10 +73,10 @@ public class AlunoRestController {
      */
     @DeleteMapping("/solicitacao/{id}/arquivo")
     public ResponseEntity<Void> removerArquivo(
-            @PathVariable("id") Long idSolicitacao,
+            @PathVariable("id") Long id,
             @RequestParam("link") String linkArquivo
     ) {
-        alunoService.removerArquivo(idSolicitacao, linkArquivo);
+        alunoService.removerArquivo(id, linkArquivo);
         return ResponseEntity.ok().build();
     }
 
@@ -104,6 +118,43 @@ public class AlunoRestController {
     ) {
         return alunoService.listarPorNome(nome);
     }
+
+    @GetMapping("/extensao/{id}")
+    public ResponseEntity<Solicitacao> buscarArquivosExtensaoPorId(
+            @PathVariable Long id
+    ) {
+        return alunoService.buscarPorId(id);
+    }
+    @GetMapping("/complementar/{id}")
+    public ResponseEntity<Solicitacao> buscarArquivosComplementarPorId(
+            @PathVariable Long id
+    ) {
+        return alunoService.buscarPorId(id);
+    }
+
+
+    /////////
+    /// Métodos de testes para utilizar no postman 
+    //////// 
+    
+    @PostMapping("/solicitacao/add/arquivo/{idSolicitacao}") 
+    public ResponseEntity<Void> adicionarArquivoPost(@PathVariable("idSolicitacao")  Long idSolicitacao,
+                                                @RequestParam("arquivo") MultipartFile arquivo) {
+        System.out.println("==================================");
+        System.out.println("Recebendo requisição para adicionar arquivo");
+        System.out.println("ID da Solicitação: " + idSolicitacao);
+        System.out.println("Nome do arquivo: " + (arquivo != null ? arquivo.getOriginalFilename() : "null"));
+        System.out.println("Tamanho do arquivo: " + (arquivo != null ? arquivo.getSize() + " bytes" : "null"));
+        System.out.println("==================================");
+         try {
+         alunoService.adicionarArquivo(idSolicitacao, arquivo);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.println("Erro ao processar arquivo: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
     /**
      * Lista todos os arquivos de uma solicitação
      */
@@ -113,4 +164,5 @@ public class AlunoRestController {
     ) {
         return alunoService.listarArquivos(idSolicitacao);
     }
+    
 }
