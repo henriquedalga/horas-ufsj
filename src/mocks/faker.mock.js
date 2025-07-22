@@ -317,4 +317,16 @@ export const handlers = [
       );
     }
   }),
+
+  http.get(`${API_URL}/admin/:id`, ({ params }) => {
+    const { id } = params;
+    console.log(
+      `[MSW] Devolvendo dados aleatórios para o admin com ID: ${id}.`
+    );
+
+    const adminData = createRandomAdmin();
+    adminData.id = id; // Garante que o ID da resposta é o mesmo da requisição
+
+    return HttpResponse.json(adminData);
+  }),
 ];

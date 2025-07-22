@@ -46,9 +46,33 @@ class AdminService {
   }
 
   async addAdmin(adminData) {
-    return await api("/admins", {
+    return await api("/admin", {
       // ou a rota que você definir
       method: "POST",
+      body: JSON.stringify(adminData),
+    });
+  }
+
+  // --- FUNÇÃO PARA BUSCAR UM ADMIN POR ID ---
+  /**
+   * Busca os dados de um único administrador/moderador pelo seu ID.
+   * @param {string} id - O ID do administrador.
+   */
+  async getAdminById(id) {
+    // A rota é dinâmica para incluir o ID
+    return await api(`/admin/${id}`, { method: "GET" });
+  }
+
+  // --- FUNÇÃO PARA EDITAR (ATUALIZAR) UM ADMIN ---
+  /**
+   * Envia os dados atualizados de um administrador.
+   * @param {string} id - O ID do administrador a ser atualizado.
+   * @param {object} adminData - O objeto com os novos dados (ex: { nome, email, role }).
+   */
+  async updateAdmin(id, adminData) {
+    // Usamos o método 'PUT' para atualizar um recurso existente
+    return await api(`/admin/${id}`, {
+      method: "PUT",
       body: JSON.stringify(adminData),
     });
   }

@@ -23,7 +23,67 @@ export default function Admin() {
   const [user, setUser] = useState({});
   const [itemsMod, setItemsMod] = useState([]);
   const [selectedModId, setSelectedModId] = useState(null);
+  const [editingAdmin, setEditingAdmin] = useState(null);
   const [isModalAdminOpen, setIsModalAdminOpen] = useState(false);
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "nome", // Chave do objeto para ordenar (padrão: 'nome')
+    direction: "ascending", // 'ascending' ou 'descending'
+  });
+
+  const handleOpenEditModal = async () => {
+    // Garante que só executa se houver um item selecionado
+    if (!selectedModId) return;
+
+    try {
+      // Busca os dados mais recentes do admin selecionado
+      const adminData = await AdminService.getAdminById(selectedModId);
+
+      // Coloca os dados no estado, o que fará o modal abrir com as informações
+      setEditingAdmin(adminData);
+    } catch (error) {
+      console.error("Erro ao buscar dados do admin para edição:", error);
+      alert("Não foi possível carregar os dados para edição.");
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingAdmin(null);
+  };
+
+  const handleSort = (key) => {
+    let direction = "ascending";
+    // Se já estiver ordenando por esta chave, inverte a direção
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedItemsMod = [...itemsMod].sort((a, b) => {
+    // LÓGICA ESPECIAL PARA A COLUNA BOOLEANA 'MODERADOR'
+    if (sortConfig.key === "role") {
+      const aIsMod = a.role === "mod"; // Será true ou false
+      const bIsMod = b.role === "mod"; // Será true ou false
+
+      // O JavaScript trata true como 1 e false como 0 em operações matemáticas.
+      if (sortConfig.direction === "ascending") {
+        return aIsMod - bIsMod; // Ordena false (0) antes de true (1)
+      } else {
+        return bIsMod - aIsMod; // Ordena true (1) antes de false (0) -> Marcados primeiro
+      }
+    }
+
+    // LÓGICA ORIGINAL PARA COLUNAS DE TEXTO (NOME, EMAIL)
+    // Certifique-se que as chaves existem nos objetos 'a' e 'b' antes de comparar
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === "ascending" ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
 
   // Move handleModSelectionChange here so it's accessible in JSX
   const handleModSelectionChange = (itemId) => {
@@ -443,23 +503,7 @@ export default function Admin() {
             </div>
             {user.role === "mod" && (
               <div className="tab-panel" id="panel-3">
-                <div className="pt-4">
-                  <div className="br-input has-icon pb-2">
-                    <input
-                      id="searchbox-3"
-                      type="text"
-                      placeholder="Quem você procura?"
-                      value={searchExtensao}
-                      // onChange={(e) => setSearchExtensao(e.target.value)}
-                    />
-                    <button
-                      className="br-button circle small"
-                      type="button"
-                      aria-label="Pesquisar"
-                    >
-                      <i className="fas fa-search" aria-hidden="true"></i>
-                    </button>
-                  </div>
+                <div className="pt-3">
                   <div className="pl-6 pr-6">
                     <div className="flex flex-col md:flex-row pt-2 pb-4 w-full align-items-center justify-between ">
                       <button
@@ -485,14 +529,71 @@ export default function Admin() {
                         type="button"
                         aria-label="Editar Funcionário"
                         disabled={!selectedModId}
+                        onClick={handleOpenEditModal}
                       >
                         <i className="fas fa-edit pr-2" aria-hidden="true"></i>
                         Editar
                       </button>
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-[2fr_3fr_auto] items-center px-4 bg-blue-100">
+                    <div className="contents font-bold text-gray-600">
+                      <button
+                        type="button"
+                        className="text-start py-2"
+                        onClick={() => handleSort("nome")}
+                      >
+                        Nome
+                        {sortConfig.key === "nome" && (
+                          <i
+                            className={`fas ${
+                              sortConfig.direction === "ascending"
+                                ? "fa-sort-up"
+                                : "fa-sort-down"
+                            } ml-1`}
+                          ></i>
+                        )}
+                      </button>
+                      {/* Adicionamos 'text-center' para o cabeçalho do Email */}
+                      <button
+                        type="button"
+                        className="text-center py-2 mr-6 pr-6"
+                        onClick={() => handleSort("email")}
+                      >
+                        Email
+                        {sortConfig.key === "email" && (
+                          <i
+                            className={`fas ${
+                              sortConfig.direction === "ascending"
+                                ? "fa-sort-up"
+                                : "fa-sort-down"
+                            } ml-1`}
+                          ></i>
+                        )}
+                      </button>
+                      {/* Adicionamos 'text-end' para o cabeçalho do Moderador */}
+                      <button
+                        type="button"
+                        className="text-end py-2"
+                        onClick={() => handleSort("role")}
+                      >
+                        Moderador
+                        {sortConfig.key === "role" && (
+                          <i
+                            className={`fas ${
+                              sortConfig.direction === "ascending"
+                                ? "fa-sort-up"
+                                : "fa-sort-down"
+                            } ml-1`}
+                          ></i>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
                   <span className="br-divider"></span>
-                  {itemsMod.map((item, index) => (
+                  {sortedItemsMod.map((item, index) => (
                     <Fragment key={index}>
                       <button
                         key={index}
@@ -501,7 +602,7 @@ export default function Admin() {
                         }`}
                         onClick={() => handleModSelectionChange(item.id)}
                       >
-                        <div className="d-flex flex-row min-h-8 w-full align-items-center justify-between">
+                        <div className="grid grid-cols-[2fr_3fr_auto] items-center px-2">
                           <span className="name">{item.nome}</span>
                           <span className="email align-self-center">
                             {item.email}
@@ -526,6 +627,17 @@ export default function Admin() {
           </div>
         </div>
       </div>
+      {editingAdmin && (
+        <ModalAdmin
+          // Passa os dados do admin para o modal preencher o formulário
+          adminToEdit={editingAdmin}
+          onClose={handleCloseEditModal}
+          onSuccess={() => {
+            refetchModData();
+            handleCloseEditModal();
+          }}
+        />
+      )}
       {isModalAdminOpen && (
         <ModalAdmin
           // Passe a função de fechar como prop para o modal

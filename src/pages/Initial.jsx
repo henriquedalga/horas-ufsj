@@ -35,8 +35,8 @@ export default function Initial() {
     // 2. VERIFICAÇÃO DE DOMÍNIO NO FRONTEND (resposta rápida ao usuário)
     const email = userObject.email;
     if (
-      !email.endsWith("@aluno.ufsj.edu.br") &&
-      !email.endsWith("@ufsj.edu.br")
+      !email.endsWith("@aluno.ufsj.edu.br")
+      // && !email.endsWith("@ufsj.edu.br")
     ) {
       alert("Acesso negado. Por favor, use um e-mail institucional da UFSJ.");
       return;
