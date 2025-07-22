@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Login from "../components/Login";
+// import Login from "../components/Login";
 import AuthService from "../services/auth.service";
 import storageService from "../services/storage.service";
 
@@ -22,42 +22,51 @@ export default function Initial() {
   //   navigate(`/login?uuid=${fakeUuid}`);
   // };
 
-  const handleGoogleLoginSuccess = async (credentialResponse) => {
-    console.log("Recebido do Google:", credentialResponse);
-
-    // O Google retorna um ID Token (JWT) no campo 'credential'
+  // --- FUNÇÃO DE LOGIN PARA ALUNOS ---
+  const handleStudentLogin = async (credentialResponse) => {
     const idToken = credentialResponse.credential;
-
-    // 1. Decodifica o token NO FRONTEND para ver o e-mail
     const userObject = jwtDecode(idToken);
-    console.log("Usuário decodificado:", userObject);
 
-    // 2. VERIFICAÇÃO DE DOMÍNIO NO FRONTEND (resposta rápida ao usuário)
-    const email = userObject.email;
-    if (
-      !email.endsWith("@aluno.ufsj.edu.br")
-      // && !email.endsWith("@ufsj.edu.br")
-    ) {
-      alert("Acesso negado. Por favor, use um e-mail institucional da UFSJ.");
+    // 1. Regra de negócio para ALUNOS
+    if (!userObject.email.endsWith("@aluno.ufsj.edu.br")) {
+      alert(
+        "Acesso negado. Por favor, use um e-mail de aluno (@aluno.ufsj.edu.br)."
+      );
       return;
     }
 
-    // 3. Envia o ID Token para o SEU backend para validação e criação de sessão
     try {
       const sessionData = await AuthService.loginWithGoogle(idToken);
-
       storageService.saveAuthToken(sessionData.token);
       storageService.saveUserData(sessionData.user);
-
-      // Redireciona para a página correta
-      if (sessionData.user.role === "mod") {
-        navigate("/admin");
-      } else {
-        navigate("/student");
-      }
+      navigate("/student"); // Redireciona para a área do aluno
     } catch (error) {
-      console.error("Falha no login com o backend:", error);
       alert("Ocorreu um erro ao tentar logar no sistema.");
+      console.error("Falha no login do aluno com o backend:", error);
+    }
+  };
+
+  // --- NOVA FUNÇÃO DE LOGIN PARA ADMINS ---
+  const handleAdminLogin = async (credentialResponse) => {
+    const idToken = credentialResponse.credential;
+    const userObject = jwtDecode(idToken);
+
+    // 2. Regra de negócio para ADMINISTRADORES
+    if (!userObject.email.endsWith("@ufsj.edu.br")) {
+      alert(
+        "Acesso negado. Apenas e-mails de funcionários (@ufsj.edu.br) são permitidos."
+      );
+      return;
+    }
+
+    try {
+      const sessionData = await AuthService.loginWithGoogle(idToken);
+      storageService.saveAuthToken(sessionData.token);
+      storageService.saveUserData(sessionData.user);
+      navigate("/admin"); // Redireciona para a área do admin
+    } catch (error) {
+      alert("Ocorreu um erro ao tentar logar no sistema.");
+      console.error("Falha no login do admin com o backend:", error);
     }
   };
 
@@ -137,7 +146,7 @@ export default function Initial() {
           <div className="tab-panel active" id="panel-1-icon">
             <div className="login-wrapper flex items-center justify-center shadow-md rounded-b-lg">
               <GoogleLogin
-                onSuccess={handleGoogleLoginSuccess}
+                onSuccess={handleStudentLogin}
                 onError={handleGoogleLoginError}
                 useOneTap // Opcional: habilita o login com um clique se o usuário já estiver logado no Google
               />
@@ -175,7 +184,13 @@ export default function Initial() {
             <Login tipo="student" /> */}
           </div>
           <div className="tab-panel" id="panel-2-icon">
-            <Login tipo="admin" />
+            <div className="login-wrapper flex items-center justify-center shadow-md rounded-b-lg p-6">
+              <GoogleLogin
+                onSuccess={handleAdminLogin} // Usa a nova função de admin
+                onError={handleGoogleLoginError}
+              />
+            </div>
+            {/* <Login tipo="admin" /> */}
           </div>
         </div>
       </div>
