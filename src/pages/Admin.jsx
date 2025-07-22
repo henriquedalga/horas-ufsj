@@ -264,25 +264,54 @@ export default function Admin() {
                       ? true
                       : item.status === statusFiltroExtensao
                   )
-                  .map((item, index) => (
-                    <Fragment key={index}>
-                      <button
-                        className="br-item"
-                        onClick={() => openModalExtensao(item.id)}
-                        key={index}
-                        disabled={
-                          item.status === "APROVADO" ||
-                          item.status === "REPROVADO"
-                        }
-                      >
-                        <div class="row  min-h-8 align-items-center">
-                          <div class="col">{item.nome}</div>
-                          <div class="col-auto">{item.status}</div>
-                        </div>
-                      </button>
-                      <span className="br-divider"></span>
-                    </Fragment>
-                  ))}
+                  .sort((a, b) => {
+                    // 2. Defina a ordem de prioridade dos status.
+                    const statusOrder = {
+                      ABERTO: 1, // Prioridade máxima
+                      FECHADO: 2, // Segunda prioridade
+                    };
+
+                    // 3. Compare os itens 'a' e 'b' com base na ordem definida.
+                    const orderA = statusOrder[a.status] || 99; // Usa 99 para status desconhecidos
+                    const orderB = statusOrder[b.status] || 99;
+
+                    return orderA - orderB;
+                  })
+                  .map((item) => {
+                    // 1. Crie um mapa para associar o status a uma classe de cor.
+                    const statusColorMap = {
+                      ABERTO: "success",
+                      FECHADO: "",
+                    };
+
+                    // 2. Pegue a classe correta do mapa. Usa '' como padrão se o status não for encontrado.
+                    const tagColorClass = statusColorMap[item.status] || "";
+
+                    return (
+                      <Fragment key={item.id}>
+                        {/* É melhor usar um ID único como key */}
+                        <button
+                          className="br-item"
+                          onClick={() => openModalExtensao(item.id)}
+                          disabled={
+                            item.status === "APROVADO" ||
+                            item.status === "REPROVADO"
+                          }
+                        >
+                          <div className="row min-h-8 align-items-center">
+                            <div className="col">{item.nome}</div>
+                            {/* 3. Adicione a classe de cor dinâmica à sua tag */}
+                            <div
+                              className={`col-auto br-tag relative group ${tagColorClass}`}
+                            >
+                              {item.status}
+                            </div>
+                          </div>
+                        </button>
+                        <span className="br-divider"></span>
+                      </Fragment>
+                    );
+                  })}
               </div>
             </div>
             <div className="tab-panel" id="panel-2">
@@ -351,35 +380,65 @@ export default function Admin() {
                 <span className="br-divider"></span>
 
                 {itemsComplementar
+                  // CORREÇÃO DO BUG: Usando a variável de busca correta para esta lista
                   .filter((item) =>
                     item.nome
                       .toLowerCase()
-                      .includes(searchExtensao.toLowerCase())
+                      .includes(searchComplementar.toLowerCase())
                   )
                   .filter((item) =>
                     statusFiltroComplementar === "TODOS"
                       ? true
                       : item.status === statusFiltroComplementar
                   )
-                  .map((item, index) => (
-                    <Fragment key={index}>
-                      <button
-                        className="br-item"
-                        onClick={() => openModalComplementar(item.id)}
-                        key={index}
-                        disabled={
-                          item.status === "APROVADO" ||
-                          item.status === "REPROVADO"
-                        }
-                      >
-                        <div class="row align-items-center min-h-8">
-                          <div class="col">{item.nome}</div>
-                          <div class="col-auto">{item.status}</div>
-                        </div>
-                      </button>
-                      <span className="br-divider"></span>
-                    </Fragment>
-                  ))}
+                  .sort((a, b) => {
+                    // 2. Defina a ordem de prioridade dos status.
+                    const statusOrder = {
+                      ABERTO: 1, // Prioridade máxima
+                      FECHADO: 2, // Segunda prioridade
+                    };
+
+                    // 3. Compare os itens 'a' e 'b' com base na ordem definida.
+                    const orderA = statusOrder[a.status] || 99; // Usa 99 para status desconhecidos
+                    const orderB = statusOrder[b.status] || 99;
+
+                    return orderA - orderB;
+                  })
+                  .map((item) => {
+                    // 1. O mesmo mapa de status para classes de cor
+                    const statusClassMap = {
+                      ABERTO: "success",
+                      FECHADO: "",
+                    };
+
+                    // 2. A mesma lógica para pegar a classe correta
+                    const tagColorClass = statusClassMap[item.status] || "";
+
+                    return (
+                      // Usando o ID do item na key, que é a melhor prática
+                      <Fragment key={item.id}>
+                        <button
+                          className="br-item"
+                          onClick={() => openModalComplementar(item.id)}
+                          disabled={
+                            item.status === "APROVADO" ||
+                            item.status === "REPROVADO"
+                          }
+                        >
+                          <div className="row align-items-center min-h-8">
+                            <div className="col">{item.nome}</div>
+                            {/* 3. Aplicação da classe de cor dinâmica na tag */}
+                            <div
+                              className={`col-auto br-tag relative group ${tagColorClass}`}
+                            >
+                              {item.status}
+                            </div>
+                          </div>
+                        </button>
+                        <span className="br-divider"></span>
+                      </Fragment>
+                    );
+                  })}
               </div>
             </div>
             {user.role === "mod" && (

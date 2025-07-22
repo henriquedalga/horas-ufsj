@@ -1,21 +1,69 @@
-import { faker } from "@faker-js/faker";
+// import { faker } from "@faker-js/faker";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Login from "../components/Login";
+import AuthService from "../services/auth.service";
+import storageService from "../services/storage.service";
 
 export default function Initial() {
   const navigate = useNavigate();
 
-  const ssoLoginUrl = `${
-    import.meta.env.VITE_SSO_BASE_URL
-  }/auth/oauth/sso/login?clientId=${import.meta.env.VITE_SSO_CLIENT_ID}`;
+  // const ssoLoginUrl = `${
+  //   import.meta.env.VITE_SSO_BASE_URL
+  // }/auth/oauth/sso/login?clientId=${import.meta.env.VITE_SSO_CLIENT_ID}`;
 
-  // A função de simulação para desenvolvimento
-  const handleMockSsoLogin = () => {
-    const fakeUuid = faker.string.uuid();
-    console.log(`[MOCK SSO] Simulando redirect com uuid: ${fakeUuid}`);
-    navigate(`/login?uuid=${fakeUuid}`);
+  // // A função de simulação para desenvolvimento
+  // const handleMockSsoLogin = () => {
+  //   const fakeUuid = faker.string.uuid();
+  //   console.log(`[MOCK SSO] Simulando redirect com uuid: ${fakeUuid}`);
+  //   navigate(`/login?uuid=${fakeUuid}`);
+  // };
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    console.log("Recebido do Google:", credentialResponse);
+
+    // O Google retorna um ID Token (JWT) no campo 'credential'
+    const idToken = credentialResponse.credential;
+
+    // 1. Decodifica o token NO FRONTEND para ver o e-mail
+    const userObject = jwtDecode(idToken);
+    console.log("Usuário decodificado:", userObject);
+
+    // 2. VERIFICAÇÃO DE DOMÍNIO NO FRONTEND (resposta rápida ao usuário)
+    const email = userObject.email;
+    if (
+      !email.endsWith("@aluno.ufsj.edu.br") &&
+      !email.endsWith("@ufsj.edu.br")
+    ) {
+      alert("Acesso negado. Por favor, use um e-mail institucional da UFSJ.");
+      return;
+    }
+
+    // 3. Envia o ID Token para o SEU backend para validação e criação de sessão
+    try {
+      const sessionData = await AuthService.loginWithGoogle(idToken);
+
+      storageService.saveAuthToken(sessionData.token);
+      storageService.saveUserData(sessionData.user);
+
+      // Redireciona para a página correta
+      if (sessionData.user.role === "mod") {
+        navigate("/admin");
+      } else {
+        navigate("/student");
+      }
+    } catch (error) {
+      console.error("Falha no login com o backend:", error);
+      alert("Ocorreu um erro ao tentar logar no sistema.");
+    }
+  };
+
+  const handleGoogleLoginError = () => {
+    console.error("Login com Google falhou");
+    alert("Não foi possível autenticar com o Google.");
   };
 
   useEffect(() => {
@@ -88,8 +136,12 @@ export default function Initial() {
         <div className="tab-content">
           <div className="tab-panel active" id="panel-1-icon">
             <div className="login-wrapper flex items-center justify-center shadow-md rounded-b-lg">
-              {/* --- LÓGICA CONDICIONAL AQUI --- */}
-              {import.meta.env.MODE === "production" ? (
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={handleGoogleLoginError}
+                useOneTap // Opcional: habilita o login com um clique se o usuário já estiver logado no Google
+              />
+              {/* {import.meta.env.MODE === "production" ? (
                 // EM PRODUÇÃO: Renderiza um link <a> para o SSO real
                 <a href={ssoLoginUrl} className="br-button primary">
                   <i className="fas fa-city" aria-hidden="true"></i>
@@ -105,7 +157,7 @@ export default function Initial() {
                   <i className="fas fa-city" aria-hidden="true"></i>
                   <span className="ml-1">Login com SSO</span>
                 </button>
-              )}
+              )} */}
               {/* <a
                 href={`${
                   import.meta.env.VITE_SSO_BASE_URL

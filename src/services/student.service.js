@@ -35,6 +35,19 @@ class StudentService {
   getSolicitacaoComplementar() {
     return api("/aluno/solicitacao/complementar");
   }
+
+  // --- NOVO MÉTODO PARA EXCLUIR ARQUIVO ---
+  /**
+   * Envia uma requisição para excluir um arquivo específico pelo seu ID.
+   * @param {string} fileId - O ID do arquivo a ser excluído.
+   */
+  async deleteFileById(fileId) {
+    // Usamos um template literal para construir a URL dinâmica com o ID do arquivo.
+    // O método HTTP correto para exclusão é o 'DELETE'.
+    return await api(`/excluir/${fileId}`, {
+      method: "DELETE",
+    });
+  }
 }
 
 export default new StudentService();

@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker/locale/pt_BR";
+import { jwtDecode } from "jwt-decode";
 import { http, HttpResponse } from "msw";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -18,13 +19,13 @@ const FAKE_AUTH_TOKEN = "Bearer fake-super-secret-admin-token-12345";
 
 /** Gera um usuário aleatório completo */
 const createRandomHoras = () => ({
-  id: faker.number.int({ min: 1, max: 10000 }),
+  id: faker.string.uuid(),
   nome: faker.person.fullName(),
   status: faker.helpers.arrayElement(["ABERTO", "FECHADO"]),
 });
 
 const createRandomAdmin = () => ({
-  id: faker.number.int({ min: 1, max: 10000 }),
+  id: faker.string.uuid(),
   nome: faker.person.fullName(),
   email: faker.internet.email(),
   role: faker.helpers.arrayElement(["admin", "mod"]),
@@ -36,17 +37,17 @@ const createFakeFile = (statusDefinido) => {
   const status =
     statusDefinido ||
     faker.helpers.arrayElement(["APROVADO", "REPROVADO", "PENDENTE"]);
-  let feedback = null;
+  let comments = null;
 
   if (status === "REPROVADO") {
-    feedback = faker.lorem.sentence();
+    comments = faker.lorem.sentence();
   }
 
   return {
     id: `arq-${faker.string.alphanumeric(10)}`,
     nome: faker.system.commonFileName("pdf"),
     status: status,
-    feedback: feedback,
+    comments: comments,
     // ... outros dados do arquivo
   };
 };
@@ -83,6 +84,30 @@ const createFakeActivityResponse = (id, tipo, statusPedidoDesejado) => {
     statusPedido: statusPedidoDesejado,
     arquivos: arquivos,
     // ... outros dados como aluno e dataEnvio
+  };
+};
+
+const createFakeActivityDetails = (id, tipo) => {
+  const statusPedido = faker.helpers.arrayElement(["FECHADO", "ABERTO"]);
+
+  // Lógica para gerar arquivos consistentes com o status (como na resposta anterior)
+  let arquivos = [];
+  if (statusPedido === "FECHADO") {
+    arquivos = faker.helpers.multiple(() => createFakeFile("APROVADO"), {
+      count: { min: 1, max: 3 },
+    });
+  } else if (statusPedido === "ABERTO") {
+    arquivos = faker.helpers.multiple(() => createFakeFile("PENDENTE"), {
+      count: { min: 1, max: 2 },
+    });
+  } // Se for ABERTO, 'arquivos' fica vazio, simulando um novo pedido.
+
+  return {
+    id: id,
+    nome: faker.person.fullName(), // <-- Chave 'nome' no nível superior
+    tipo: tipo,
+    statusPedido: statusPedido,
+    arquivos: arquivos,
   };
 };
 
@@ -205,6 +230,42 @@ export const handlers = [
 
     return HttpResponse.json({ message: "UUID inválido" }, { status: 400 });
   }),
+  http.get(`${API_URL}/extensao/:id`, ({ request, params }) => {
+    // Validação de token
+    if (!request.headers.get("Authorization")) {
+      return HttpResponse.json({ message: "Não autorizado" }, { status: 401 });
+    }
+
+    const { id } = params;
+    console.log(
+      `[MSW] Buscando detalhes para atividade 'extensao' com ID: ${id}`
+    );
+
+    // O gerador é chamado com o tipo 'extensao' explicitamente
+    const response = createFakeActivityDetails(id, "extensao");
+
+    // Para o modal, o 'nome' do aluno é retornado no nível superior
+    return HttpResponse.json(response);
+  }),
+
+  // ROTA ESPECÍFICA para buscar detalhes de uma atividade COMPLEMENTAR
+  http.get(`${API_URL}/complementar/:id`, ({ request, params }) => {
+    // Validação de token
+    if (!request.headers.get("Authorization")) {
+      return HttpResponse.json({ message: "Não autorizado" }, { status: 401 });
+    }
+
+    const { id } = params;
+    console.log(
+      `[MSW] Buscando detalhes para atividade 'complementar' com ID: ${id}`
+    );
+
+    // O gerador é chamado com o tipo 'complementar' explicitamente
+    const response = createFakeActivityDetails(id, "complementar");
+
+    // Para o modal, o 'nome' do aluno é retornado no nível superior
+    return HttpResponse.json(response);
+  }),
 
   // As duas rotas agora usam a mesma função de handler dinâmico
   http.get(`${API_URL}/aluno/solicitacao/extensao`, handleSolicitacaoAluno),
@@ -213,4 +274,47 @@ export const handlers = [
   // Adicionamos um :tipo na rota para que o handler saiba qual tipo de atividade gerar
   // Esta é uma forma mais limpa de reutilizar a lógica
   http.get(`${API_URL}/aluno/solicitacao/:tipo`, handleSolicitacaoAluno),
+
+  http.post(`${API_URL}/auth/google-login`, async ({ request }) => {
+    const { token: idToken } = await request.json();
+
+    try {
+      // 1. Simula a decodificação do token que o backend faria
+      const userObject = jwtDecode(idToken);
+
+      // 2. VERIFICAÇÃO DE DOMÍNIO OBRIGATÓRIA NO BACKEND
+      const email = userObject.email;
+      if (
+        !email.endsWith("@aluno.ufsj.edu.br") &&
+        !email.endsWith("@ufsj.edu.br")
+      ) {
+        return HttpResponse.json(
+          { message: "Domínio de e-mail não autorizado" },
+          { status: 403 }
+        ); // 403 Forbidden
+      }
+
+      // 3. Simula a criação do usuário/sessão
+      const isAluno = email.endsWith("@aluno.ufsj.edu.br");
+
+      // Cria um usuário falso para retornar
+      const internalUser = {
+        id: faker.string.uuid(),
+        name: userObject.name,
+        email: userObject.email,
+        role: isAluno ? "student" : "mod", // Exemplo de lógica de roles
+      };
+
+      // Retorna o token da NOSSA aplicação
+      return HttpResponse.json({
+        user: internalUser,
+        token: `Bearer fake-session-token-${faker.string.uuid()}`,
+      });
+    } catch {
+      return HttpResponse.json(
+        { message: "ID Token inválido" },
+        { status: 401 }
+      );
+    }
+  }),
 ];

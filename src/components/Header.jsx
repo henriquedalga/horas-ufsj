@@ -13,9 +13,9 @@ export default function Header() {
     if (isAuthenticated) {
       AuthService.logout(); // limpa token/localStorage
       setIsAuthenticated(false);
-      navigate("/login"); // ou página inicial
+      navigate("/Main"); // ou página inicial
     } else {
-      navigate("/login");
+      navigate("/Main");
     }
   };
 

@@ -22,6 +22,13 @@ class AuthService {
       body: JSON.stringify({ uuid: uuid }),
     });
   }
+
+  async loginWithGoogle(idToken) {
+    return await api("/auth/google-login", {
+      method: "POST",
+      body: JSON.stringify({ token: idToken }),
+    });
+  }
   // Login: envia email e password, recebe token e dados do usuário
   // async login(email, password) {
   //   const response = await api.post("/auth/signin", { email, password });

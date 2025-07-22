@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import StudentService from "../services/student.service";
-import FileItem from "./FilesItem";
+import FileItem from "./FileItem";
 
 export default function Upload({ tipo }) {
   const uploadRef = useRef(null); // referência local ao componente
@@ -61,7 +61,7 @@ export default function Upload({ tipo }) {
 
     try {
       // Supondo que exista um método no serviço para deletar
-      // await StudentService.deleteFile(tipo, id, fileId);
+      await StudentService.deleteFileById(fileId);
 
       // Remove o arquivo da lista na interface
       setExistingFiles((prevFiles) => prevFiles.filter((f) => f.id !== fileId));
@@ -148,23 +148,25 @@ export default function Upload({ tipo }) {
 
   return (
     <div ref={uploadRef} className="flex flex-col">
-      <div className="br-upload">
+      <div className="br-upload mb-3">
         <label className="upload-label" htmlFor="multiple-files">
           <span>Envio de arquivos</span>
         </label>
         <input
-          className="upload-input"
+          className="upload-input "
           id="multiple-files"
           type="file"
           multiple
           aria-label="enviar arquivo"
           onChange={handleFileChange}
         />
-        <div className="upload-list">{renderContent()}</div>
+        <div className="upload-list">
+          <div className="pt-2">{renderContent()}</div>
+        </div>
       </div>
 
       {/* --- BOTÃO DE ENVIO E INDICADORES DE STATUS --- */}
-      <div className="pt-2 flex w-full max-w-lg">
+      <div className="flex w-full max-w-lg">
         <button
           type="button"
           className="br-button primary ml-auto"

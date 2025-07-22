@@ -55,7 +55,7 @@ export default function FileItem({ file, onDelete }) {
             `}
             role="tooltip"
           >
-            {file.feedback || file.status}
+            {file.comments || file.status}
             {/* Adiciona uma seta/triângulo para o tooltip */}
             <div
               className={`absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 ${tooltipColorClass.replace(

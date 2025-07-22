@@ -1,18 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import AdminService from "../services/admin.service";
 
 export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
   const [respostas, setRespostas] = useState([]);
+  const modalBodyRef = useRef(null);
 
   useEffect(() => {
+    console.log("Modal aberto:", isOpen, "Arquivos:", arquivos);
     if (isOpen && arquivos.length > 0) {
       setRespostas(
         arquivos.map((arquivo) => ({
           status: arquivo.status || "",
-          comentario: "",
+          comments: "",
         }))
       );
+    }
+  }, [isOpen, arquivos]);
+
+  useEffect(() => {
+    // Só executa se o modal estiver aberto e a biblioteca existir
+    if (isOpen && window.core?.BRSelect && modalBodyRef.current) {
+      const selectInstances = [];
+      // Busca os selects APENAS DENTRO do corpo do modal
+      const brSelects = modalBodyRef.current.querySelectorAll(".br-select");
+
+      for (const brSelect of brSelects) {
+        // A inicialização agora é feita de forma segura
+        selectInstances.push(new window.core.BRSelect("br-select", brSelect));
+      }
+
+      // // Função de limpeza para evitar memory leaks
+      // return () => {
+      //   selectInstances.forEach(
+      //     (inst) => inst && inst.destroy && inst.destroy()
+      //   );
+      // };
     }
   }, [isOpen, arquivos]);
 
@@ -92,6 +115,51 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
                   <div className="col">
                     <span>{arquivo.nome}</span>
                   </div>
+
+                  <div className="col">
+                    <div className="br-select" ref={modalBodyRef}>
+                      <div className="br-input">
+                        <input
+                          id="select-simple"
+                          type="text"
+                          placeholder="Selecione o item"
+                        />
+                        <button
+                          className="br-button"
+                          type="button"
+                          aria-label="Exibir lista"
+                          tabIndex="-1"
+                          data-trigger="data-trigger"
+                        >
+                          <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                      <div className="br-list" tabIndex="0">
+                        <div className="br-item" tabIndex="-1">
+                          <div className="br-radio">
+                            <input
+                              id="rb0"
+                              type="radio"
+                              name="estados-simples"
+                              value="rb0"
+                            />
+                            <label for="rb0">1</label>
+                          </div>
+                        </div>
+                        <div className="br-item" tabIndex="-1">
+                          <div className="br-radio">
+                            <input
+                              id="rb1"
+                              type="radio"
+                              name="estados-simples"
+                              value="rb1"
+                            />
+                            <label for="rb1">2</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {respostas[index]?.status === "REPROVADO" && (
@@ -101,7 +169,7 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
                       id={`comentario-${index}`}
                       className="br-textarea w-full"
                       rows={3}
-                      value={respostas[index].comentario}
+                      value={respostas[index].comments}
                       onChange={(e) =>
                         handleComentarioChange(index, e.target.value)
                       }
@@ -116,15 +184,15 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
         </div>
 
         <div className="br-modal-footer justify-content-center">
-          <button className="br-button secondary" onClick={onClose}>
+          <button className="br-button secondary min-w-35" onClick={onClose}>
             Cancelar
           </button>
           <button
-            className="br-button primary mt-3 mt-sm-0 ml-sm-3"
+            className="br-button primary mt-3 mt-sm-0 ml-sm-3 min-w-35"
             type="button"
             onClick={handleSubmit}
           >
-            Retornar
+            Aceitar
           </button>
         </div>
       </div>
