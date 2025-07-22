@@ -52,7 +52,10 @@ export default function Initial() {
     const userObject = jwtDecode(idToken);
 
     // 2. Regra de negócio para ADMINISTRADORES
-    if (!userObject.email.endsWith("@ufsj.edu.br")) {
+    if (
+      !userObject.email.endsWith("@ufsj.edu.br") ||
+      !userObject.email.endsWith("@aluno.ufsj.edu.br")
+    ) {
       alert(
         "Acesso negado. Apenas e-mails de funcionários (@ufsj.edu.br) são permitidos."
       );
