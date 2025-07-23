@@ -7,13 +7,14 @@ class StudentService {
     });
   }
 
-  async postFilesExtensao(fileData) {
+  async postFilesExtensao(file) {
+    const formData = new FormData();
+    formData.append("file", file); // o nome "file" deve bater com o backend Java
+
     return await api(`/extensao/files`, {
       method: "POST",
-      body: JSON.stringify(fileData),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      body: formData,
+      // NÃO definir manualmente o Content-Type
     });
   }
 
