@@ -18,13 +18,14 @@ const FAKE_AUTH_TOKEN = "Bearer fake-super-secret-admin-token-12345";
 // --- 2. Geradores de Dados Aleatórios (usados pelo dashboard) ---
 
 /** Gera um usuário aleatório completo */
-const createRandomHoras = () => ({
+const objetoExtensaoComplementar = () => ({
   id: faker.string.uuid(),
   nome: faker.person.fullName(),
   status: faker.helpers.arrayElement(["ABERTO", "FECHADO"]),
+  pendente: faker.helpers.arrayElement([true, false]),
 });
 
-const createRandomAdmin = () => ({
+const ObjetoAdministradores = () => ({
   id: faker.string.uuid(),
   nome: faker.person.fullName(),
   email: faker.internet.email(),
@@ -32,7 +33,7 @@ const createRandomAdmin = () => ({
 });
 
 // Gerador para um único arquivo. Agora ele pode receber um status específico.
-const createFakeFile = (statusDefinido) => {
+const objetoArquivoInterno = (statusDefinido) => {
   // Se um status for passado, usa ele. Senão, escolhe aleatoriamente.
   const status =
     statusDefinido ||
@@ -48,20 +49,25 @@ const createFakeFile = (statusDefinido) => {
     nome: faker.system.commonFileName("pdf"),
     status: status,
     comments: comments,
+    horas: faker.number.int({ min: 1, max: 10 }),
+    url: faker.internet.url(), // URL do arquivo
     // ... outros dados do arquivo
   };
 };
 
 // GERADOR PRINCIPAL: Agora ele constrói a resposta com base nas suas regras de negócio.
-const createFakeActivityResponse = (id, tipo, statusPedidoDesejado) => {
+const objetoPedidoCada = (id, tipo, statusPedidoDesejado) => {
   let arquivos = [];
 
   switch (statusPedidoDesejado) {
     case "FECHADO":
       // Regra: Todos os arquivos devem estar APROVADOS.
-      arquivos = faker.helpers.multiple(() => createFakeFile("APROVADO"), {
-        count: { min: 1, max: 3 },
-      });
+      arquivos = faker.helpers.multiple(
+        () => objetoArquivoInterno("APROVADO"),
+        {
+          count: { min: 1, max: 3 },
+        }
+      );
       break;
 
     case "ABERTO": {
@@ -69,9 +75,9 @@ const createFakeActivityResponse = (id, tipo, statusPedidoDesejado) => {
       // Vamos sortear um dos dois cenários.
       const comArquivosReprovados = faker.datatype.boolean();
       if (comArquivosReprovados) {
-        arquivos.push(createFakeFile("REPROVADO")); // Garante pelo menos um reprovado
-        arquivos.push(createFakeFile("APROVADO"));
-        arquivos.push(createFakeFile("PENDENTE"));
+        arquivos.push(objetoArquivoInterno("REPROVADO")); // Garante pelo menos um reprovado
+        arquivos.push(objetoArquivoInterno("APROVADO"));
+        arquivos.push(objetoArquivoInterno("PENDENTE"));
       }
       // Se não, o array 'arquivos' fica vazio, o que também significa ABERTO.
       break;
@@ -87,19 +93,26 @@ const createFakeActivityResponse = (id, tipo, statusPedidoDesejado) => {
   };
 };
 
-const createFakeActivityDetails = (id, tipo) => {
+const objetoPedidoPorId = (id, tipo) => {
   const statusPedido = faker.helpers.arrayElement(["FECHADO", "ABERTO"]);
 
   // Lógica para gerar arquivos consistentes com o status (como na resposta anterior)
   let arquivos = [];
   if (statusPedido === "FECHADO") {
-    arquivos = faker.helpers.multiple(() => createFakeFile("APROVADO"), {
+    arquivos = faker.helpers.multiple(() => objetoArquivoInterno("APROVADO"), {
       count: { min: 1, max: 3 },
     });
   } else if (statusPedido === "ABERTO") {
-    arquivos = faker.helpers.multiple(() => createFakeFile("PENDENTE"), {
-      count: { min: 1, max: 2 },
-    });
+    arquivos.push(
+      ...faker.helpers.multiple(() => objetoArquivoInterno("PENDENTE"), {
+        count: { min: 1, max: 2 },
+      })
+    );
+    arquivos.push(
+      ...faker.helpers.multiple(() => objetoArquivoInterno("APROVADO"), {
+        count: { min: 1, max: 2 },
+      })
+    );
   } // Se for ABERTO, 'arquivos' fica vazio, simulando um novo pedido.
 
   return {
@@ -111,7 +124,7 @@ const createFakeActivityDetails = (id, tipo) => {
   };
 };
 
-const handleSolicitacaoAluno = ({ request, params }) => {
+const objetoSolicitacaoAluno = ({ request, params }) => {
   // 1. A única verificação é a existência do token
   const authHeader = request.headers.get("Authorization");
   if (!authHeader) {
@@ -131,7 +144,7 @@ const handleSolicitacaoAluno = ({ request, params }) => {
 
   // 3. Usa o gerador para criar uma resposta COMPLETA e CONSISTENTE com o status sorteado
   // O 'params.tipo' virá da rota que foi chamada ('extensao' ou 'complementar')
-  const responseData = createFakeActivityResponse(
+  const responseData = objetoPedidoCada(
     faker.string.uuid(), // Gera um ID de atividade aleatório
     params.tipo,
     statusSorteado
@@ -152,7 +165,7 @@ const adminModHandler = ({ request }) => {
     );
   }
 
-  const newAdmins = faker.helpers.multiple(createRandomAdmin, {
+  const newAdmins = faker.helpers.multiple(ObjetoAdministradores, {
     count: faker.number.int({ min: 50, max: 500 }),
   });
 
@@ -169,7 +182,7 @@ const horasHandler = ({ request }) => {
       { status: 401 }
     );
   }
-  const newHoras = faker.helpers.multiple(createRandomHoras, {
+  const newHoras = faker.helpers.multiple(objetoExtensaoComplementar, {
     count: faker.number.int({ min: 50, max: 500 }),
   });
 
@@ -210,26 +223,26 @@ export const handlers = [
   http.get(`${API_URL}/admin`, adminModHandler),
   http.get(`${API_URL}/mod`, adminModHandler),
 
-  http.post(`${API_URL}/auth/sso-validate`, async ({ request }) => {
-    const { uuid } = await request.json();
+  // http.post(`${API_URL}/auth/sso-validate`, async ({ request }) => {
+  //   const { uuid } = await request.json();
 
-    if (uuid) {
-      console.log(`[MSW] Validando o UUID (falso) ${uuid}`);
+  //   if (uuid) {
+  //     console.log(`[MSW] Validando o UUID (falso) ${uuid}`);
 
-      // SUCESSO! Agora usamos o Faker para criar os dados do usuário logado.
-      return HttpResponse.json({
-        user: {
-          id: faker.string.uuid(),
-          name: faker.person.fullName(),
-          email: faker.internet.email(),
-          role: "student", // ou 'mod', etc.
-        },
-        token: `fake-session-token-${faker.string.uuid()}`, // Token da nossa aplicação
-      });
-    }
+  //     // SUCESSO! Agora usamos o Faker para criar os dados do usuário logado.
+  //     return HttpResponse.json({
+  //       user: {
+  //         id: faker.string.uuid(),
+  //         name: faker.person.fullName(),
+  //         email: faker.internet.email(),
+  //         role: "student", // ou 'mod', etc.
+  //       },
+  //       token: `fake-session-token-${faker.string.uuid()}`, // Token da nossa aplicação
+  //     });
+  //   }
 
-    return HttpResponse.json({ message: "UUID inválido" }, { status: 400 });
-  }),
+  //   return HttpResponse.json({ message: "UUID inválido" }, { status: 400 });
+  // }),
   http.get(`${API_URL}/extensao/:id`, ({ request, params }) => {
     // Validação de token
     if (!request.headers.get("Authorization")) {
@@ -242,7 +255,7 @@ export const handlers = [
     );
 
     // O gerador é chamado com o tipo 'extensao' explicitamente
-    const response = createFakeActivityDetails(id, "extensao");
+    const response = objetoPedidoPorId(id, "extensao");
 
     // Para o modal, o 'nome' do aluno é retornado no nível superior
     return HttpResponse.json(response);
@@ -261,19 +274,19 @@ export const handlers = [
     );
 
     // O gerador é chamado com o tipo 'complementar' explicitamente
-    const response = createFakeActivityDetails(id, "complementar");
+    const response = objetoPedidoPorId(id, "complementar");
 
     // Para o modal, o 'nome' do aluno é retornado no nível superior
     return HttpResponse.json(response);
   }),
 
   // As duas rotas agora usam a mesma função de handler dinâmico
-  http.get(`${API_URL}/aluno/solicitacao/extensao`, handleSolicitacaoAluno),
-  http.get(`${API_URL}/aluno/solicitacao/complementar`, handleSolicitacaoAluno),
+  http.get(`${API_URL}/aluno/solicitacao/extensao`, objetoSolicitacaoAluno),
+  http.get(`${API_URL}/aluno/solicitacao/complementar`, objetoSolicitacaoAluno),
 
   // Adicionamos um :tipo na rota para que o handler saiba qual tipo de atividade gerar
   // Esta é uma forma mais limpa de reutilizar a lógica
-  http.get(`${API_URL}/aluno/solicitacao/:tipo`, handleSolicitacaoAluno),
+  http.get(`${API_URL}/aluno/solicitacao/:tipo`, objetoSolicitacaoAluno),
 
   http.post(`${API_URL}/auth/google-login`, async ({ request }) => {
     const { token: idToken } = await request.json();
@@ -295,20 +308,21 @@ export const handlers = [
       }
 
       // 3. Simula a criação do usuário/sessão
-      const isAluno = email.endsWith("@aluno.ufsj.edu.br");
+      // const isAluno = email.endsWith("@aluno.ufsj.edu.br");
 
       // Cria um usuário falso para retornar
       const internalUser = {
         id: faker.string.uuid(),
         name: userObject.name,
         email: userObject.email,
-        role: isAluno ? "student" : "mod", // Exemplo de lógica de roles
+        role: "mod",
+        // isAluno ? "student" :
       };
 
       // Retorna o token da NOSSA aplicação
       return HttpResponse.json({
         user: internalUser,
-        token: `Bearer fake-session-token-${faker.string.uuid()}`,
+        token: FAKE_AUTH_TOKEN,
       });
     } catch {
       return HttpResponse.json(
@@ -324,7 +338,7 @@ export const handlers = [
       `[MSW] Devolvendo dados aleatórios para o admin com ID: ${id}.`
     );
 
-    const adminData = createRandomAdmin();
+    const adminData = ObjetoAdministradores();
     adminData.id = id; // Garante que o ID da resposta é o mesmo da requisição
 
     return HttpResponse.json(adminData);

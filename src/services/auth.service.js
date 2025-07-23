@@ -15,13 +15,14 @@ class AuthService {
     return data;
   }
 
-  async validateSsoUuid(uuid) {
-    // Nova rota para validação do uuid
-    return await api("/auth/sso-validate", {
-      method: "POST",
-      body: JSON.stringify({ uuid: uuid }),
-    });
-  }
+  // async validateSsoUuid(uuid) {
+  //   // Nova rota para validação do uuid
+
+  //   return await api("/auth/sso-validate", {
+  //     method: "POST",
+  //     body: JSON.stringify({ uuid: uuid }),
+  //   });
+  // }
 
   async loginWithGoogle(idToken) {
     return await api("/auth/google-login", {

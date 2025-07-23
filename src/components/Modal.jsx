@@ -13,6 +13,7 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
         arquivos.map((arquivo) => ({
           status: arquivo.status || "",
           comments: "",
+          horas: arquivo.horas || 0, // Adiciona o campo 'horas'
         }))
       );
     }
@@ -67,6 +68,17 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
     }
   }
 
+  const handleHorasChange = (index, valor) => {
+    // Remove qualquer caractere que não seja um dígito
+    const valorInteiro = valor.replace(/[^0-9]/g, "");
+
+    const atualizadas = [...respostas];
+    // Atualiza o valor. Se a string ficar vazia, guardamos 0 ou uma string vazia.
+    atualizadas[index].horas =
+      valorInteiro === "" ? 0 : parseInt(valorInteiro, 10);
+    setRespostas(atualizadas);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -81,8 +93,8 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
           {arquivos.map((arquivo, index) => (
             <div key={arquivo.id}>
               <div className="br-item">
-                <div className="row align-items-center">
-                  <div className="col-auto">
+                <div className="row align-items-center flex-nowrap ">
+                  <div className="col-auto p-0">
                     <div className="br-radio valid">
                       <input
                         id={`radio-aprovar-${index}`}
@@ -97,7 +109,7 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
                     </div>
                   </div>
 
-                  <div className="col-auto">
+                  <div className="col-auto p-0">
                     <div className="br-radio invalid">
                       <input
                         id={`radio-reprovar-${index}`}
@@ -112,52 +124,33 @@ export default function Modal({ isOpen, onClose, nome, id, arquivos, tipo }) {
                     </div>
                   </div>
 
-                  <div className="col">
-                    <span>{arquivo.nome}</span>
+                  <div className="col overflow-hidden">
+                    <a
+                      href={arquivo.url} // Usa a URL do objeto 'arquivo'
+                      target="_blank" // Abre o link em uma nova aba
+                      rel="noopener noreferrer" // Boas práticas de segurança para links externos
+                      title={arquivo.nome} // Mostra o nome completo no hover (tooltip do navegador)
+                      className="text-blue-600 hover:underline truncate" // Estilização do link
+                    >
+                      {arquivo.nome}
+                    </a>
                   </div>
 
-                  <div className="col">
-                    <div className="br-select" ref={modalBodyRef}>
-                      <div className="br-input">
-                        <input
-                          id="select-simple"
-                          type="text"
-                          placeholder="Selecione o item"
-                        />
-                        <button
-                          className="br-button"
-                          type="button"
-                          aria-label="Exibir lista"
-                          tabIndex="-1"
-                          data-trigger="data-trigger"
-                        >
-                          <i class="fas fa-angle-down" aria-hidden="true"></i>
-                        </button>
-                      </div>
-                      <div className="br-list" tabIndex="0">
-                        <div className="br-item" tabIndex="-1">
-                          <div className="br-radio">
-                            <input
-                              id="rb0"
-                              type="radio"
-                              name="estados-simples"
-                              value="rb0"
-                            />
-                            <label for="rb0">1</label>
-                          </div>
-                        </div>
-                        <div className="br-item" tabIndex="-1">
-                          <div className="br-radio">
-                            <input
-                              id="rb1"
-                              type="radio"
-                              name="estados-simples"
-                              value="rb1"
-                            />
-                            <label for="rb1">2</label>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="col max-w-18">
+                    <div className="br-input">
+                      <input
+                        id={`horas-${index}`} // IDs devem ser únicos na página
+                        type="number"
+                        pattern="[0-9]*"
+                        inputMode="numeric"
+                        placeholder="Horas"
+                        name={`horas-${index}`}
+                        value={respostas[index]?.horas || ""}
+                        onChange={(e) =>
+                          handleHorasChange(index, e.target.value)
+                        }
+                        aria-label="Horas"
+                      />
                     </div>
                   </div>
                 </div>

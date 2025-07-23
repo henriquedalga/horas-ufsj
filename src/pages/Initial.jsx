@@ -53,7 +53,7 @@ export default function Initial() {
 
     // 2. Regra de negócio para ADMINISTRADORES
     if (
-      !userObject.email.endsWith("@ufsj.edu.br") ||
+      // !userObject.email.endsWith("@ufsj.edu.br")
       !userObject.email.endsWith("@aluno.ufsj.edu.br")
     ) {
       alert(
