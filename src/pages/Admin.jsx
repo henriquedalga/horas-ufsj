@@ -459,27 +459,34 @@ export default function Admin() {
                       : item.status === statusFiltroComplementar
                   )
                   .sort((a, b) => {
-                    // 2. Defina a ordem de prioridade dos status.
-                    const statusOrder = {
-                      ABERTO: 1, // Prioridade máxima
-                      FECHADO: 2, // Segunda prioridade
+                    // Função auxiliar para calcular a prioridade de um item
+                    const getPriority = (item) => {
+                      if (item.pendente === true) {
+                        return 1; // Prioridade 1: Pendentes vêm primeiro.
+                      }
+                      if (item.status === "ABERTO") {
+                        return 2; // Prioridade 2: Abertos vêm em segundo.
+                      }
+                      if (item.status === "FECHADO") {
+                        return 3; // Prioridade 3: Fechados vêm por último.
+                      }
+                      return 99; // Padrão para qualquer outro caso.
                     };
 
-                    // 3. Compare os itens 'a' e 'b' com base na ordem definida.
-                    const orderA = statusOrder[a.status] || 99; // Usa 99 para status desconhecidos
-                    const orderB = statusOrder[b.status] || 99;
+                    const priorityA = getPriority(a);
+                    const priorityB = getPriority(b);
 
-                    return orderA - orderB;
+                    return priorityA - priorityB;
                   })
                   .map((item) => {
                     // 1. O mesmo mapa de status para classes de cor
                     const statusClassMap = {
-                      ABERTO: "success",
-                      FECHADO: "",
+                      true: "success",
+                      false: "",
                     };
 
                     // 2. A mesma lógica para pegar a classe correta
-                    const tagColorClass = statusClassMap[item.status] || "";
+                    const tagColorClass = statusClassMap[item.pendente] || "";
 
                     return (
                       // Usando o ID do item na key, que é a melhor prática
